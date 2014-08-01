@@ -246,8 +246,8 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 					for (PriceData data : datas) {
 						LocalDate billstartDate = startDate;
 						LocalDate billEndDate = null;
-   				//end date is null for rc
-
+   				
+						//end date is null for rc
 						if (data.getChagreType().equalsIgnoreCase("RC")	&& endDate != null) {
 							billEndDate = endDate;
 						
@@ -338,6 +338,7 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 		}catch (DataIntegrityViolationException dve) {
 			handleCodeDataIntegrityIssues(command, dve);
 			return new CommandProcessingResult(Long.valueOf(-1));
+
 		}
 		}
 
@@ -656,7 +657,8 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 		  }
 		  
 		  final LocalDate startDate=new LocalDate();
-		  List<SubscriptionData> subscriptionDatas=this.contractPeriodReadPlatformService.retrieveSubscriptionDatabyContractType("Month(s)",1);
+		 // List<SubscriptionData> subscriptionDatas=this.contractPeriodReadPlatformService.retrieveSubscriptionDatabyContractType("Month(s)",1);
+		  List<SubscriptionData> subscriptionDatas=this.contractPeriodReadPlatformService.retrieveSubscriptionDatabyOrder(orderId);
 		  Contract contractPeriod=this.subscriptionRepository.findOne(subscriptionDatas.get(0).getId());
 		  LocalDate EndDate=calculateEndDate(startDate,contractPeriod.getSubscriptionType(),contractPeriod.getUnits());
 		   order.setStartDate(startDate);
@@ -702,7 +704,7 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 			
 			if(plan.getProvisionSystem().equalsIgnoreCase(ProvisioningApiConstants.PROV_PACKETSPAN)){
 				
-				this.provisioningWritePlatformService.postOrderDetailsForProvisioning(order,plan.getPlanCode(),UserActionStatusTypeEnum.ACTIVATION.toString(),
+				this.provisioningWritePlatformService.postOrderDetailsForProvisioning(order,plan.getPlanCode(), requstStatus,
 						processingResult.resourceId(),null,null);
 			}
 			
