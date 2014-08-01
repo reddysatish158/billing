@@ -109,22 +109,24 @@ public class BillingMasterApiResourse {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response printInvoice(@PathParam("billId") final Long billId) {
+		
 		BillMaster billMaster = this.billMasterRepository.findOne(billId);
 		String FileName = billMaster.getFileName();
-		if(FileName.equalsIgnoreCase("invoice")){
-		try {
-			this.billWritePlatformService.ireportPdf(billId);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		}
-		BillMaster billMaster1=this.billMasterRepository.findOne(billId);
-		String printFileName = billMaster1.getFileName();
-		File file = new File(printFileName);
-		ResponseBuilder response = Response.ok(file);
-		response.header("Content-Disposition", "attachment; filename=\""+ printFileName + "\"");
-		response.header("Content-Type", "application/pdf");
-		return response.build();
+		    
+		   if(FileName.equalsIgnoreCase("invoice")){
+			   try {
+				   this.billWritePlatformService.ireportPdf(billId);
+			   } catch (SQLException e) {
+				   e.printStackTrace();
+			   }
+		   }
+		 BillMaster billMaster1=this.billMasterRepository.findOne(billId);
+		 String printFileName = billMaster1.getFileName();
+		 File file = new File(printFileName);
+		 ResponseBuilder response = Response.ok(file);
+		 response.header("Content-Disposition", "attachment; filename=\""+ printFileName + "\"");
+		 response.header("Content-Type", "application/pdf");
+		 return response.build();
 	}
 	
 	@GET

@@ -204,187 +204,166 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 		try{
 			LocalDate endDate = null;
 			Long orderStatus=null;
-			//context.authenticatedUser().
 			this.fromApiJsonDeserializer.validateForCreate(command.json());
 			
 		//Check for Custome_Validation
 			CustomValidationData customValidationData   = this.orderDetailsReadPlatformServices.checkForCustomValidations(clientId,EventActionConstants.EVENT_CREATE_ORDER,command.json());
-			
+			 
 			if(customValidationData.getErrorCode() != 0 && customValidationData.getErrorMessage() != null){
 				throw new ActivePlansFoundException(customValidationData.getErrorMessage()); 
 			}
-			
-			
 			List<OrderLine> serviceDetails = new ArrayList<OrderLine>();
 			List<OrderPrice> orderprice = new ArrayList<OrderPrice>();
 			List<PriceData> datas = new ArrayList<PriceData>();
-			
-			//OrderDetailsReadPlatformServicesImpl orderReadPlatformImpl = new OrderDetailsReadPlatformServicesImpl(context,jdbcTemplate);
             Order order=Order.fromJson(clientId,command);
 			Plan plan = this.planRepository.findOne(order.getPlanId());
-			   
 			List<ServiceData> details =this.orderDetailsReadPlatformServices.retrieveAllServices(order.getPlanId());
 			datas=this.orderDetailsReadPlatformServices.retrieveAllPrices(order.getPlanId(),order.getBillingFrequency(),clientId);
-			 if(datas.isEmpty()){
-				 datas=this.orderDetailsReadPlatformServices.retrieveDefaultPrices(order.getPlanId(),order.getBillingFrequency(),clientId);
-			  }
-			 if(datas.isEmpty()){
-				  throw new NoRegionalPriceFound();
-			  }
 			
-			Contract subscriptionData = this.subscriptionRepository.findOne(order.getContarctPeriod());
-			LocalDate startDate=new LocalDate(order.getStartDate());
+				if(datas.isEmpty()){
+					datas=this.orderDetailsReadPlatformServices.retrieveDefaultPrices(order.getPlanId(),order.getBillingFrequency(),clientId);
+				}
+				if(datas.isEmpty()){
+					throw new NoRegionalPriceFound();
+				}
 			
-			if(plan.getProvisionSystem().equalsIgnoreCase("None")){
-			orderStatus = OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.ACTIVE).getId();
-			}else{
-			orderStatus = OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.PENDING).getId();
-			}
-		
-			
-			//Calculate EndDate
-			endDate = calculateEndDate(startDate,subscriptionData.getSubscriptionType(),subscriptionData.getUnits());
-			
-			order=new Order(order.getClientId(),order.getPlanId(),orderStatus,null,order.getBillingFrequency(),startDate, endDate,
-					order.getContarctPeriod(), serviceDetails, orderprice,order.getbillAlign(),UserActionStatusTypeEnum.ACTIVATION.toString());
-			BigDecimal priceforHistory=BigDecimal.ZERO;
-		
-			for (PriceData data : datas) {
+				Contract subscriptionData = this.subscriptionRepository.findOne(order.getContarctPeriod());
+				LocalDate startDate=new LocalDate(order.getStartDate());
 				
-				  LocalDate billstartDate = startDate;
-				   LocalDate billEndDate = null;
-				   
-   				//end date is null for rc
-				  if (data.getChagreType().equalsIgnoreCase("RC")	&& endDate != null) {
-					billEndDate = endDate;
+					if(plan.getProvisionSystem().equalsIgnoreCase("None")){
+						orderStatus = OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.ACTIVE).getId();
 					
-				  } else if(data.getChagreType().equalsIgnoreCase("NRC")) {
-					billEndDate = billstartDate;
-				  }
-				  
-				  final DiscountMaster discountMaster=this.discountMasterRepository.findOne(data.getDiscountId());
-				  if(discountMaster == null){
-					  throw new DiscountMasterNoRecordsFoundException();
-				  }
+					}else{
+						orderStatus = OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.PENDING).getId();
+					}
+
+					//Calculate EndDate
+					endDate = calculateEndDate(startDate,subscriptionData.getSubscriptionType(),subscriptionData.getUnits());
+					order=new Order(order.getClientId(),order.getPlanId(),orderStatus,null,order.getBillingFrequency(),startDate, endDate,
+					order.getContarctPeriod(), serviceDetails, orderprice,order.getbillAlign(),UserActionStatusTypeEnum.ACTIVATION.toString());
+					BigDecimal priceforHistory=BigDecimal.ZERO;
+		
+					for (PriceData data : datas) {
+						LocalDate billstartDate = startDate;
+						LocalDate billEndDate = null;
+   				//end date is null for rc
+
+						if (data.getChagreType().equalsIgnoreCase("RC")	&& endDate != null) {
+							billEndDate = endDate;
+						
+						} else if(data.getChagreType().equalsIgnoreCase("NRC")) {
+							billEndDate = billstartDate;
+						}
+						final DiscountMaster discountMaster=this.discountMasterRepository.findOne(data.getDiscountId());
+						
+						if(discountMaster == null){
+							throw new DiscountMasterNoRecordsFoundException();
+						}
 
 				 //If serviceId Not Exist
-				 OrderPrice price = new OrderPrice(data.getServiceId(),data.getChargeCode(), data.getCharging_variant(),data.getPrice(), null, data.getChagreType(),
+						OrderPrice price = new OrderPrice(data.getServiceId(),data.getChargeCode(), data.getCharging_variant(),data.getPrice(), null, data.getChagreType(),
 						 data.getChargeDuration(), data.getDurationType(),billstartDate.toDate(), billEndDate,data.isTaxInclusive());
-				 order.addOrderDeatils(price);
-				 priceforHistory=priceforHistory.add(data.getPrice());
-				
-				//discount Order
-				OrderDiscount orderDiscount=new OrderDiscount(order,price,discountMaster.getId(),discountMaster.getStartDate(),null,discountMaster.getDiscountType(),
+						order.addOrderDeatils(price);
+						priceforHistory=priceforHistory.add(data.getPrice());
+
+						//discount Order
+						OrderDiscount orderDiscount=new OrderDiscount(order,price,discountMaster.getId(),discountMaster.getStartDate(),null,discountMaster.getDiscountType(),
 						discountMaster.getDiscountRate());
-				price.addOrderDiscount(orderDiscount);
-			}
+						price.addOrderDiscount(orderDiscount);
+					}
 			
-			for (ServiceData data : details) {
-				OrderLine orderdetails = new OrderLine(data.getPlanId(),data.getServiceType(), plan.getStatus(), 'n');
-				order.addServiceDeatils(orderdetails);
-			}
-	
-			this.orderRepository.save(order);
-			
-			
-			Long userId=null;
-			SecurityContext context = SecurityContextHolder.getContext();
-	        if (context.getAuthentication() != null) {
-	        	AppUser appUser=this.context.authenticatedUser();
-				userId=appUser.getId();
+					for (ServiceData data : details) {
+						OrderLine orderdetails = new OrderLine(data.getPlanId(),data.getServiceType(), plan.getStatus(), 'n');
+						order.addServiceDeatils(orderdetails);
+					}
+					this.orderRepository.save(order);
+					Long userId=null;
+					SecurityContext context = SecurityContextHolder.getContext();
 					
-	        }else{
-	        	userId=new Long(0);
-	        }
-	        
-			boolean isNewPlan=command.booleanPrimitiveValueOfParameterNamed("isNewplan");
-			String requstStatus =UserActionStatusTypeEnum.ACTIVATION.toString();
+					if (context.getAuthentication() != null) {
+						AppUser appUser=this.context.authenticatedUser();
+						userId=appUser.getId();
+					}else{
+						userId=new Long(0);
+					}
+					boolean isNewPlan=command.booleanPrimitiveValueOfParameterNamed("isNewplan");
+					String requstStatus =UserActionStatusTypeEnum.ACTIVATION.toString();
 			
-			if(isNewPlan){
-			     
-				final AccountNumberGenerator orderNoGenerator = this.accountIdentifierGeneratorFactory.determineClientAccountNoGenerator(order.getId());
-				order.updateOrderNum(orderNoGenerator.generate());
-				this.orderRepository.save(order);
+					if(isNewPlan){
+						final AccountNumberGenerator orderNoGenerator = this.accountIdentifierGeneratorFactory.determineClientAccountNoGenerator(order.getId());
+						order.updateOrderNum(orderNoGenerator.generate());
+						this.orderRepository.save(order);
 
-				//Prepare a Requset For Order
-				
-			     CommandProcessingResult processingResult=this.prepareRequestWriteplatformService.prepareNewRequest(order,plan,requstStatus);
-				
-			
-			   //For Transaction History
-			     transactionHistoryWritePlatformService.saveTransactionHistory(order.getClientId(), "New Order", order.getStartDate(),"Price:"+priceforHistory,
-			     "PlanId:"+order.getPlanId(),"contarctPeriod:"+order.getContarctPeriod(),"OrderID:"+order.getId(),
-			     "BillingAlign:"+order.getbillAlign());
+						//Prepare a Requset For Order
+						CommandProcessingResult processingResult=this.prepareRequestWriteplatformService.prepareNewRequest(order,plan,requstStatus);
+						
+						//For Transaction History
+						transactionHistoryWritePlatformService.saveTransactionHistory(order.getClientId(), "New Order", order.getStartDate(),"Price:"+priceforHistory,
+								"PlanId:"+order.getPlanId(),"contarctPeriod:"+order.getContarctPeriod(),"OrderID:"+order.getId(),
+								"BillingAlign:"+order.getbillAlign());
 			     
-			   //For Order History
-				OrderHistory orderHistory=new OrderHistory(order.getId(),new LocalDate(),new LocalDate(),processingResult.commandId(),requstStatus,userId,null);
-				this.orderHistoryRepository.save(orderHistory);
-			}
+						//	For Order History
+						OrderHistory orderHistory=new OrderHistory(order.getId(),new LocalDate(),new LocalDate(),processingResult.commandId(),requstStatus,userId,null);
+						this.orderHistoryRepository.save(orderHistory);
+						}
 			
-            //For Plan And HardWare Association
-			GlobalConfigurationProperty configurationProperty=this.configurationRepository.findOneByName(CONFIG_PROPERTY);
-			
-			if(configurationProperty.isEnabled()){
-				    configurationProperty=this.configurationRepository.findOneByName(CPE_TYPE);
-			    if(plan.isHardwareReq() == 'Y'){
-			    	
-			    		   List<AllocationDetailsData> allocationDetailsDatas=this.allocationReadPlatformService.retrieveHardWareDetailsByItemCode(clientId,plan.getPlanCode(),configurationProperty.getValue());
-			    		   if(!allocationDetailsDatas.isEmpty())
-			    		   {
-			    				this.associationWriteplatformService.createNewHardwareAssociation(clientId,plan.getId(),allocationDetailsDatas.get(0).getSerialNo(),order.getId());
-			    				transactionHistoryWritePlatformService.saveTransactionHistory(order.getClientId(), "Association", new Date(),"Serial No:"
-			    				+allocationDetailsDatas.get(0).getSerialNo(),"Item:"+allocationDetailsDatas.get(0).getItemDescription(),"Plan Code:"+plan.getPlanCode());
-			    		   }
-			    }
-		   }
-		
-			if(plan.getProvisionSystem().equalsIgnoreCase("None")){
+					//For Plan And HardWare Association
+					GlobalConfigurationProperty configurationProperty=this.configurationRepository.findOneByName(CONFIG_PROPERTY);
+					
+					if(configurationProperty.isEnabled()){
+						configurationProperty=this.configurationRepository.findOneByName(CPE_TYPE);
+			    
+							if(plan.isHardwareReq() == 'Y'){
+								List<AllocationDetailsData> allocationDetailsDatas=this.allocationReadPlatformService.retrieveHardWareDetailsByItemCode(clientId,plan.getPlanCode(),configurationProperty.getValue());
 
-				
-				Client client=this.clientRepository.findOne(clientId);
-				client.setStatus(ClientStatus.ACTIVE.getValue());
-				this.clientRepository.save(client);
-				
-			List<ActionDetaislData> actionDetaislDatas=this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_CREATE_ORDER);
-			if(actionDetaislDatas.size() != 0){
-			this.actiondetailsWritePlatformService.AddNewActions(actionDetaislDatas,command.entityId(), order.getId().toString());
-			}
-			}
-			return new CommandProcessingResult(order.getId());	
-	}catch (DataIntegrityViolationException dve) {
-		handleCodeDataIntegrityIssues(command, dve);
-		return new CommandProcessingResult(Long.valueOf(-1));
-	}
-	}
-	
-	
-	//Calculate EndDate
-	public LocalDate calculateEndDate(LocalDate startDate,String durationType,Long duration) {
+								if(!allocationDetailsDatas.isEmpty()){
+									this.associationWriteplatformService.createNewHardwareAssociation(clientId,plan.getId(),allocationDetailsDatas.get(0).getSerialNo(),order.getId());
+									transactionHistoryWritePlatformService.saveTransactionHistory(order.getClientId(), "Association", new Date(),"Serial No:"
+											+allocationDetailsDatas.get(0).getSerialNo(),"Item:"+allocationDetailsDatas.get(0).getItemDescription(),"Plan Code:"+plan.getPlanCode());
+								}
+							}
+					}
 		
-		LocalDate contractEndDate = null;
-		if (durationType.equalsIgnoreCase("DAY(s)")) {
-			
-			 contractEndDate = startDate.plusDays(duration.intValue() - 1);
-		} else if (durationType.equalsIgnoreCase("MONTH(s)")) {
-			
-			 contractEndDate = startDate.plusMonths(duration.intValue()).minusDays(1);
-		} else if (durationType.equalsIgnoreCase("YEAR(s)")) {
-			
-			 contractEndDate = startDate.plusYears(duration.intValue()).minusDays(1);
-		} else if (durationType.equalsIgnoreCase("week(s)")) {
-			
-			 contractEndDate = startDate.plusWeeks(duration.intValue()).minusDays(1);
+					if(plan.getProvisionSystem().equalsIgnoreCase("None")){
+						Client client=this.clientRepository.findOne(clientId);
+						client.setStatus(ClientStatus.ACTIVE.getValue());
+						this.clientRepository.save(client);
+						List<ActionDetaislData> actionDetaislDatas=this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_CREATE_ORDER);
+
+						if(actionDetaislDatas.size() != 0){
+							this.actiondetailsWritePlatformService.AddNewActions(actionDetaislDatas,command.entityId(), order.getId().toString());
+						}
+					}
+					return new CommandProcessingResult(order.getId());	
+		}catch (DataIntegrityViolationException dve) {
+			handleCodeDataIntegrityIssues(command, dve);
+			return new CommandProcessingResult(Long.valueOf(-1));
 		}
- 
-		return contractEndDate;
-	}
-	private void handleCodeDataIntegrityIssues(JsonCommand command,DataIntegrityViolationException dve) {
-     //   Throwable realCause = dve.getMostSpecificCause();
-        throw new PlatformDataIntegrityException("error.msg.office.unknown.data.integrity.issue",
+		}
+
+    //Calculate EndDate
+		public LocalDate calculateEndDate(LocalDate startDate,String durationType,Long duration) {
+
+			LocalDate contractEndDate = null;
+			 	if (durationType.equalsIgnoreCase("DAY(s)")) {
+			 		contractEndDate = startDate.plusDays(duration.intValue() - 1);
+			 	
+			 	} else if (durationType.equalsIgnoreCase("MONTH(s)")) {
+			 		contractEndDate = startDate.plusMonths(duration.intValue()).minusDays(1);
+			 	
+			 	} else if (durationType.equalsIgnoreCase("YEAR(s)")) {
+			 		contractEndDate = startDate.plusYears(duration.intValue()).minusDays(1);
+			 	
+			 	} else if (durationType.equalsIgnoreCase("week(s)")) {
+			 		contractEndDate = startDate.plusWeeks(duration.intValue()).minusDays(1);
+			 	}
+			 	return contractEndDate;
+		}
+			private void handleCodeDataIntegrityIssues(JsonCommand command,DataIntegrityViolationException dve) {
+				//   	Throwable realCause = dve.getMostSpecificCause();
+				throw new PlatformDataIntegrityException("error.msg.office.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
-    
-	}
-	
+			}
     @Transactional
 	@Override
 	public CommandProcessingResult updateOrderPrice(Long orderId,JsonCommand command) {

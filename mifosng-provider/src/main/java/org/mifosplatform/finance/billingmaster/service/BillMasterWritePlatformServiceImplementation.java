@@ -159,13 +159,16 @@ public class BillMasterWritePlatformServiceImplementation implements
 		String filePath=billMaster.getFileName();
 		BillingMessage billingMessage=null;
 		List<BillingMessageTemplate> billingMessageTemplate=this.messageTemplateRepository.findAll();
+		
 		for(BillingMessageTemplate  msgTemplate:billingMessageTemplate){
-			if(msgTemplate.getTemplateDescription().equalsIgnoreCase("Bill_EMAIL"));
-		              
-		    billingMessage=new BillingMessage(msgTemplate.getHeader(),msgTemplate.getBody(),msgTemplate.getFooter(),clientEmail,clientEmail,
-		    		                    msgTemplate.getSubject(),"N",msgTemplate,msgTemplate.getMessageType(),filePath);
+			
+			if(msgTemplate.getTemplateDescription().equalsIgnoreCase("Bill_EMAIL")){
+		         billingMessage=new BillingMessage(msgTemplate.getHeader(),msgTemplate.getBody(),msgTemplate.getFooter(),clientEmail,clientEmail,
+		    		                msgTemplate.getSubject(),"N",msgTemplate,msgTemplate.getMessageType(),filePath);
+		         this.messageDataRepository.save(billingMessage);
+			}
 		}
-		this.messageDataRepository.save(billingMessage);
+		
 		return billingMessage.getId();
 	}
 }
