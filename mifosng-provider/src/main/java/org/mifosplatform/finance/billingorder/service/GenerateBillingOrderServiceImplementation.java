@@ -43,7 +43,6 @@ public class GenerateBillingOrderServiceImplementation implements	GenerateBillin
 	public List<BillingOrderCommand> generatebillingOrder(
 			List<BillingOrderData> products) {
 		
-
 		
 		BillingOrderCommand billingOrderCommand = null;
 		List<BillingOrderCommand> billingOrderCommands = new ArrayList<BillingOrderCommand>();
@@ -169,9 +168,7 @@ public class GenerateBillingOrderServiceImplementation implements	GenerateBillin
 	}
 	@Override
 	public Invoice generateInvoice(List<BillingOrderCommand> billingOrderCommands) {
-		//BigDecimal totalChargeAmountForServices = BigDecimal.ZERO;
-		//BigDecimal totalTaxAmountForServices = BigDecimal.ZERO;
-		
+
 		BigDecimal invoiceAmount = BigDecimal.ZERO;
 		BigDecimal totalChargeAmount = BigDecimal.ZERO;
 		BigDecimal netTaxAmount = BigDecimal.ZERO;
@@ -205,14 +202,13 @@ public class GenerateBillingOrderServiceImplementation implements	GenerateBillin
 			
 			for(InvoiceTaxCommand invoiceTaxCommand : invoiceTaxCommands){
 				
+			   if(invoiceTaxCommand.getTaxAmount().compareTo(BigDecimal.ZERO)>0){
 				netChargeTaxAmount = netChargeTaxAmount.add(invoiceTaxCommand.getTaxAmount());
-				
 				InvoiceTax invoiceTax = new InvoiceTax(invoice, charge, invoiceTaxCommand.getTaxCode(),
 						invoiceTaxCommand.getTaxValue(), invoiceTaxCommand.getTaxPercentage(), invoiceTaxCommand.getTaxAmount());
 				charge.addChargeTaxes(invoiceTax);
-				
 			}
-			
+			}
 			
 			  if(billingOrderCommand.getTaxInclusive()!=null){
 				  
@@ -233,7 +229,7 @@ public class GenerateBillingOrderServiceImplementation implements	GenerateBillin
 			//for (InvoiceTax invoiceTax : listOfTaxes) {
 			//	netTaxForService = invoiceTax.getTaxAmount().add(netTaxForService);
 			//}
-			//totalTaxAmountForServices = totalTaxAmountForServices.add(netTaxForService);
+			
 		 }
 		 // invoiceAmount = totalChargeAmountForServices;
         //				.add(totalTaxAmountForServices);
