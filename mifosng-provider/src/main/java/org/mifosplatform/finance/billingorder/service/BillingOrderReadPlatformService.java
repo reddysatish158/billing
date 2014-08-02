@@ -33,8 +33,6 @@ public interface BillingOrderReadPlatformService {
 
 	TaxMappingRateData retriveExemptionTaxDetails(Long clientId);
 
-	//void getPlanProrataDetails(Long planId);
-
 
 
 
