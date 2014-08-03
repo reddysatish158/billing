@@ -161,12 +161,15 @@ public class BillMasterWritePlatformServiceImplementation implements
 		List<BillingMessageTemplate> billingMessageTemplate=this.messageTemplateRepository.findAll();
 		
 		for(BillingMessageTemplate  msgTemplate:billingMessageTemplate){
-			
+
 			if(msgTemplate.getTemplateDescription().equalsIgnoreCase("Bill_EMAIL")){
-		         billingMessage=new BillingMessage(msgTemplate.getHeader(),msgTemplate.getBody(),msgTemplate.getFooter(),clientEmail,clientEmail,
-		    		                msgTemplate.getSubject(),"N",msgTemplate,msgTemplate.getMessageType(),filePath);
-		         this.messageDataRepository.save(billingMessage);
-			}
+		              
+		    billingMessage=new BillingMessage(msgTemplate.getHeader(),msgTemplate.getBody(),msgTemplate.getFooter(),clientEmail,clientEmail,
+		    		                    msgTemplate.getSubject(),"N",msgTemplate,msgTemplate.getMessageType(),filePath);
+		this.messageDataRepository.save(billingMessage);
+			
+	      }
+
 		}
 		
 		return billingMessage.getId();

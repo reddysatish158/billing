@@ -59,9 +59,14 @@ public class ItemMaster extends AbstractPersistable<Long>{
              this.units=units;
              this.warranty=warranty;
              this.unitPrice=unitPrice;
+<<<<<<< HEAD
              if(reorderLevel!=null){
             	 this.reorderLevel=reorderLevel; 
              }
+=======
+             this.reorderLevel=reorderLevel; 
+            
+>>>>>>> upstream/master
 	}
 
 	public String getItemCode() {
