@@ -408,16 +408,12 @@ public String discountOrderSchema() {
 		   }
 		 }
 		private final static class taxMapper implements RowMapper<TaxMappingRateData>
-		{
-
+		  {
 			@Override
-			public TaxMappingRateData mapRow(ResultSet rs, int rowNum)
-					throws SQLException {
+			public TaxMappingRateData mapRow(ResultSet rs, int rowNum)throws SQLException {
 				final String taxExemption=rs.getString("taxExemption");
 				return new TaxMappingRateData(taxExemption);
 			}
-			
 		}
 
-	 
-}
+   }
