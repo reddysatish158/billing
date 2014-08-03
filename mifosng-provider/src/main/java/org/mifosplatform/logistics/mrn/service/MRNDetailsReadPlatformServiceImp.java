@@ -39,7 +39,7 @@ public class MRNDetailsReadPlatformServiceImp implements MRNDetailsReadPlatformS
 		@Override
 		public MRNDetailsData mapRow(ResultSet rs, int rowNum)
 				throws SQLException {
-			final String id = rs.getString("id");
+			final String id = rs.getString("mrnId");
 			final LocalDate requestedDate =JdbcSupport.getLocalDate(rs,"requestedDate");
 			final String fromOffice = rs.getString("fromOffice");
 			final String toOffice = rs.getString("toOffice");
@@ -141,7 +141,7 @@ public class MRNDetailsReadPlatformServiceImp implements MRNDetailsReadPlatformS
 	
 	@Override
 	public Page<MRNDetailsData> retriveMRNDetails(SearchSqlQuery searchMRNDetails) {
-		final String sql = "Select Concat("+"'MRN '"+",mrn.id) as id, mrn.requested_date as requestedDate," +
+		final String sql = "Select Concat("+"'MRN '"+",mrn.id) as mrnId, mrn.requested_date as requestedDate," +
 				"(select item_description from b_item_master where id=mrn.item_master_id) as item," +
 				" (select name from m_office where id=mrn.from_office) as fromOffice, (select name from m_office where id = mrn.to_office) as toOffice," +
 				"mrn.orderd_quantity as orderdQuantity, mrn.received_quantity as receivedQuantity, mrn.status as status from b_mrn mrn ";
