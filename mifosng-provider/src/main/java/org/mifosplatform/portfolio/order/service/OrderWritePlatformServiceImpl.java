@@ -15,6 +15,7 @@ import org.mifosplatform.billing.pricing.data.PriceData;
 import org.mifosplatform.billing.promotioncodes.domain.Promotion;
 import org.mifosplatform.billing.promotioncodes.domain.PromotionRepository;
 import org.mifosplatform.cms.eventorder.service.PrepareRequestWriteplatformService;
+import org.mifosplatform.commands.data.ProcessingResultLookup;
 import org.mifosplatform.finance.billingorder.exceptions.NoPromotionFoundException;
 import org.mifosplatform.finance.billingorder.service.ReverseInvoice;
 import org.mifosplatform.finance.payments.api.PaymentsApiResource;
@@ -499,7 +500,7 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 			
 			if(plan.getProvisionSystem().equalsIgnoreCase(ProvisioningApiConstants.PROV_PACKETSPAN)){
 				this.provisioningWritePlatformService.postOrderDetailsForProvisioning(order,plan.getPlanCode(),UserActionStatusTypeEnum.DISCONNECTION.toString(),
-						processingResult.resourceId(),null,null);
+						processingResult.resourceId(),null,null,order.getId());
 			}
 			
 			//For Order History
@@ -594,7 +595,7 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
            			
                   if(plan.getProvisionSystem().equalsIgnoreCase(ProvisioningApiConstants.PROV_PACKETSPAN)){
            				this.provisioningWritePlatformService.postOrderDetailsForProvisioning(orderDetails,plan.getPlanCode(),UserActionStatusTypeEnum.ACTIVATION.toString(),
-           						processingResult.resourceId(),null,null);
+           						processingResult.resourceId(),null,null,orderDetails.getId());
            		   }
                    orderDetails.setNextBillableDay(null);
     	          
@@ -705,7 +706,7 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 			if(plan.getProvisionSystem().equalsIgnoreCase(ProvisioningApiConstants.PROV_PACKETSPAN)){
 				
 				this.provisioningWritePlatformService.postOrderDetailsForProvisioning(order,plan.getPlanCode(), requstStatus,
-						processingResult.resourceId(),null,null);
+						processingResult.resourceId(),null,null,order.getId());
 			}
 			
 			//For Order History
@@ -820,22 +821,18 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 		}
 	}
 	
-	
-	@Override
-	public CommandProcessingResult changePlan(JsonCommand command, Long entityId) {
+@Transactional
+@Override
+public CommandProcessingResult changePlan(JsonCommand command, Long entityId) {
 		
 		try{
-			
 			Long userId=this.context.authenticatedUser().getId();
 			Order order=this.orderRepository.findOne(entityId);
-			
 			order.updateDisconnectionstate();
-		
 			this.orderRepository.save(order);
+
 			Plan oldPlan=this.planRepository.findOne(order.getPlanId());
-			
 			if(oldPlan.getBillRule() !=400 && oldPlan.getBillRule() !=300){ 
-		          
 				this.reverseInvoice.reverseInvoiceServices(order.getId(), order.getClientId(),new LocalDate());
 	        }
 			CommandProcessingResult result=this.createOrder(order.getClientId(), command);
@@ -843,6 +840,7 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 			Order newOrder=this.orderRepository.findOne(result.resourceId());
 			newOrder.updateOrderNum(order.getOrderNo());
 			newOrder.updateActivationDate(order.getActiveDate());
+			
 			newOrder.setuserAction(UserActionStatusTypeEnum.CHANGE_PLAN.toString());
 			this.orderRepository.save(newOrder);
 			Plan plan=this.planRepository.findOne(newOrder.getPlanId());
@@ -857,19 +855,23 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 				}
 			}
 			
+			Long processResuiltId=new Long(0);
+			if(oldPlan.getProvisionSystem().equalsIgnoreCase(ProvisioningApiConstants.PROV_PACKETSPAN)){
+				this.provisioningWritePlatformService.postOrderDetailsForProvisioning(newOrder, plan.getCode(), UserActionStatusTypeEnum.CHANGE_PLAN.toString(), 
+						new Long(0), null, null,order.getId());
+			}else{
 			//Prepare a Requset For Order
 		     CommandProcessingResult processingResult=this.prepareRequestWriteplatformService.prepareNewRequest(newOrder,plan,UserActionStatusTypeEnum.CHANGE_PLAN.toString());
+		     processResuiltId=processingResult.commandId();
+			}
 		     
 		   //For Order History
-			OrderHistory orderHistory=new OrderHistory(order.getId(),new LocalDate(),new LocalDate(),processingResult.commandId(),
+			OrderHistory orderHistory=new OrderHistory(order.getId(),new LocalDate(),new LocalDate(),processResuiltId,
 					                               UserActionStatusTypeEnum.CHANGE_PLAN.toString(),userId,null);
 			this.orderHistoryRepository.save(orderHistory);
 			this.transactionHistoryWritePlatformService.saveTransactionHistory(order.getClientId(),"Change Order", new Date(),"Old Order :"+entityId,
 					                               " New OrderId :"+result.resourceId());
-			
 			return new CommandProcessingResult(result.resourceId());
-			
-			
 		}catch(DataIntegrityViolationException exception){
 			handleCodeDataIntegrityIssues(command, exception);
 			return new CommandProcessingResult(new Long(-1));
@@ -1108,7 +1110,7 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 			CommandProcessingResult processingResult= this.prepareRequestWriteplatformService.prepareNewRequest(order,plan,StatusTypeEnum.TERMINATED.toString());
 			if(plan.getProvisionSystem().equalsIgnoreCase(ProvisioningApiConstants.PROV_PACKETSPAN)){
 				this.provisioningWritePlatformService.postOrderDetailsForProvisioning(order, plan.getCode(), UserActionStatusTypeEnum.TERMINATION.toString(), 
-						processingResult.resourceId(), null, null);
+						processingResult.resourceId(), null, null,order.getId());
 			}
 
 			transactionHistoryWritePlatformService.saveTransactionHistory(order.getClientId(),"Order Termination", new Date(),"User :"+userName,

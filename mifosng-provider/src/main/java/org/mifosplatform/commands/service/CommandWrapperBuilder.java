@@ -2381,6 +2381,13 @@ public CommandWrapperBuilder editGrn(Long id) {
 	return this;
 }
 
+public CommandWrapperBuilder updateIpStatus() {
+	this.actionName = "UPDATEIPSTATUS";
+	this.entityName = "IPPOOLMANAGEMENT";
+	this.href = "itemdetails/editgrn";
+	return this;
+	}
+
 
 }
 

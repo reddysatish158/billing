@@ -976,6 +976,9 @@ public class SynchronousCommandProcessingService implements
 				     }else if(wrapper.isUpdate()) {
 				         handler = applicationContext.getBean("updateIpPoolManagementCommandHandler",NewCommandSourceHandler.class);
 				   
+				     }else if(wrapper.isUpdateIpStatus()) {
+				         handler = applicationContext.getBean("updateIpAddressStatusCommandHandler",NewCommandSourceHandler.class);
+				   
 				     }else {
 				           throw new UnsupportedCommandException(wrapper.commandName());
 				     }

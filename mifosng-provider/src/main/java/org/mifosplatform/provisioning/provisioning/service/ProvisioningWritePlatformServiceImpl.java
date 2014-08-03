@@ -40,6 +40,7 @@ import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestDetail
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestRepository;
 import org.mifosplatform.provisioning.processrequest.service.ProcessRequestReadplatformService;
 import org.mifosplatform.provisioning.provisioning.api.ProvisioningApiConstants;
+import org.mifosplatform.provisioning.provisioning.data.ServiceParameterData;
 import org.mifosplatform.provisioning.provisioning.domain.ProvisioningCommand;
 import org.mifosplatform.provisioning.provisioning.domain.ProvisioningCommandParameters;
 import org.mifosplatform.provisioning.provisioning.domain.ProvisioningCommandRepository;
@@ -74,9 +75,11 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
     private final ProvisioningCommandRepository provisioningCommandRepository;
     private final IpPoolManagementJpaRepository ipPoolManagementJpaRepository;
 	private final InventoryItemDetailsRepository inventoryItemDetailsRepository;
+	private final ProvisioningReadPlatformService provisioningReadPlatformService;
     private final ProvisioningCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 	private final ProcessRequestReadplatformService processRequestReadplatformService;
 	private final IpPoolManagementReadPlatformService ipPoolManagementReadPlatformService;
+	
 	
     @Autowired
 	public ProvisioningWritePlatformServiceImpl(final PlatformSecurityContext context,final InventoryItemDetailsRepository inventoryItemDetailsRepository,
@@ -85,7 +88,8 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 			final ProcessRequestRepository processRequestRepository,final OrderRepository orderRepository,final PrepareRequsetRepository prepareRequsetRepository,
 			final FromJsonHelper fromJsonHelper,final HardwareAssociationRepository associationRepository,final ServiceMasterRepository serviceMasterRepository,
 			final ProcessRequestReadplatformService processRequestReadplatformService,final IpPoolManagementJpaRepository ipPoolManagementJpaRepository,
-			final IpPoolManagementReadPlatformService ipPoolManagementReadPlatformService,final ClientRepository clientRepository) {
+			final IpPoolManagementReadPlatformService ipPoolManagementReadPlatformService,final ClientRepository clientRepository,
+			final ProvisioningReadPlatformService provisioningReadPlatformService) {
 
     	this.context = context;
     	this.fromJsonHelper=fromJsonHelper;
@@ -102,6 +106,7 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 		this.provisioningCommandRepository=provisioningCommandRepository;
 		this.ipPoolManagementJpaRepository=ipPoolManagementJpaRepository;
 		this.inventoryItemDetailsRepository=inventoryItemDetailsRepository;
+		this.provisioningReadPlatformService=provisioningReadPlatformService;
 		this.processRequestReadplatformService=processRequestReadplatformService;
 		this.ipPoolManagementReadPlatformService=ipPoolManagementReadPlatformService;
 
@@ -402,11 +407,11 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 	}
 	@Transactional
     @Override
-	public void postOrderDetailsForProvisioning(Order order,String planName,String requestType,Long prepareId,String groupname,String serialNo) {
+	public void postOrderDetailsForProvisioning(Order order,String planName,String requestType,Long prepareId,String groupname,String serialNo,Long orderId) {
 		try{
 			
 			this.context.authenticatedUser();
-			List<ServiceParameters> parameters=this.serviceParametersRepository.findDataByOrderId(order.getId());
+			List<ServiceParameters> parameters=this.serviceParametersRepository.findDataByOrderId(orderId);
 			
 			if(!parameters.isEmpty()){
 			    ProcessRequest processRequest=new ProcessRequest(prepareId,order.getClientId(),order.getId(),ProvisioningApiConstants.PROV_PACKETSPAN, requestType);
@@ -447,6 +452,13 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 		        		}else{
 		        			jsonObject.put(ProvisioningApiConstants.PROV_DATA_IPTYPE,"Single");
 		        		}
+		        	}
+		        	if(serviceParameters.getParameterName().equalsIgnoreCase(ProvisioningApiConstants.PROV_DATA_SERVICE) && 
+		        			requestType.equalsIgnoreCase(UserActionStatusTypeEnum.CHANGE_PLAN.toString())){
+		        		
+		        		List<ServiceParameterData> serviceDatas=this.provisioningReadPlatformService.getSerivceParameters(order.getId());
+		        		 jsonObject.put(serviceParameters.getParameterName(),serviceDatas.get(0).getParamValue());
+		        		 jsonObject.put(ProvisioningApiConstants.PROV_DATA_OLD_ORDERID,orderId);
 		        	}
 		        	if(serviceParameters.getParameterName().equalsIgnoreCase(ProvisioningApiConstants.PROV_DATA_GROUPNAME) && groupname != null){
 		        		jsonObject.put("NEW_"+serviceParameters.getParameterName(),serviceParameters.getParameterValue());

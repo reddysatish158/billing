@@ -181,7 +181,7 @@ public CommandProcessingResult dohardWareSwapping(Long entityId,JsonCommand comm
 	            if(plan.getProvisionSystem().equalsIgnoreCase(ProvisioningApiConstants.PROV_PACKETSPAN)){
 					
 					this.provisioningWritePlatformService.postOrderDetailsForProvisioning(order,plan.getPlanCode(),UserActionStatusTypeEnum.DEVICE_SWAP.toString(),
-							processingResult.resourceId(),null,serialNo);
+							processingResult.resourceId(),null,serialNo,order.getId());
 				}
 			}
 					

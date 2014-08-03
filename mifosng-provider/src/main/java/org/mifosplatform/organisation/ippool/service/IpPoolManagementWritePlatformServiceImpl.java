@@ -1,10 +1,9 @@
 package org.mifosplatform.organisation.ippool.service;
 
 import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-
+import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
 import org.apache.commons.collections.map.HashedMap;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -17,6 +16,7 @@ import org.mifosplatform.organisation.ippool.domain.IpPoolManagementDetail;
 import org.mifosplatform.organisation.ippool.domain.IpPoolManagementJpaRepository;
 import org.mifosplatform.organisation.ippool.exception.IpAddresNotAvailableException;
 import org.mifosplatform.organisation.ippool.serialization.IpPoolManagementCommandFromApiJsonDeserializer;
+import org.mifosplatform.provisioning.provisioning.api.ProvisioningApiConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -184,6 +184,55 @@ public class IpPoolManagementWritePlatformServiceImpl implements IpPoolManagemen
     	
     	return new CommandProcessingResultBuilder().with(generatedIPPoolID).build();
 		//return null;
+	}
+
+	@Override
+	public CommandProcessingResult updateIpAddressStatus(JsonCommand command) {
+		
+		try{
+		
+			    String[] ipAddressArray=null;
+			 	final String ipValue=command.stringValueOfParameterNamed("ipAddress");
+			 	final String status=command.stringValueOfParameterNamed("status");
+			 	
+			 	IpPoolManagementDetail ipPoolManagementDetail= this.ipPoolManagementJpaRepository.findAllocatedIpAddressData(ipValue);
+      			if(ipPoolManagementDetail != null){
+      				ipPoolManagementDetail.setStatus(status.trim().charAt(0));
+      				ipPoolManagementDetail.setClientId(null);
+      				this.ipPoolManagementJpaRepository.save(ipPoolManagementDetail);
+      			}
+			 	
+			/*if(ipValue.contains("/")){
+			    IpGeneration ipGeneration=new IpGeneration(ipValue,this.ipPoolManagementReadPlatformService);
+				 ipAddressArray=ipGeneration.getInfo().getsubnetAddresses();
+				          
+				        for(int i=0;i<ipAddressArray.length;i++){
+				    	    IpPoolManagementDetail ipPoolManagementDetail= this.ipPoolManagementJpaRepository.findAllocatedIpAddressData(ipAddressArray[i]);
+					  
+				    	    	if(ipPoolManagementDetail != null){
+				    	    		ipPoolManagementDetail.setStatus(status.charAt(0));
+				    	    		ipPoolManagementDetail.setClientId(null);
+				    	    		this.ipPoolManagementJpaRepository.save(ipPoolManagementDetail);
+				    	    	}
+				        }
+			}else{
+					
+				JSONArray ipAddresses = new  JSONArray(ipValue);
+  	            	for(int i=0;i<ipAddresses.length();i++){
+  	            		IpPoolManagementDetail ipPoolManagementDetail= this.ipPoolManagementJpaRepository.findAllocatedIpAddressData(ipAddresses.getString(i));
+  	            			if(ipPoolManagementDetail != null){
+  	            				ipPoolManagementDetail.setStatus(status.charAt(0));
+  	            				ipPoolManagementDetail.setClientId(null);
+  	            				this.ipPoolManagementJpaRepository.save(ipPoolManagementDetail);
+  	            			}
+  	            	}
+			}*/
+		    
+			return new CommandProcessingResult(1l);
+		}catch(DataIntegrityViolationException exception){
+		 exception.printStackTrace();
+		 return null;
+		}
 	}
 	
 	
