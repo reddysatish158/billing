@@ -80,11 +80,13 @@ public class GenerateBill {
 		LocalDate nextbillDate = null;
 		
 		startDate = new LocalDate(billingOrderData.getBillStartDate());
+	    LocalDate durationDate = startDate.plusMonths(billingOrderData.getChargeDuration()).minusDays(1);
 		LocalDate monthStartDate = startDate.dayOfMonth().withMinimumValue();
+		int totalDays=Days.daysBetween(startDate, durationDate).getDays()+1;
 		Plan plan = this.planRepository.findOne(billingOrderData.getPlanId());
 		//check  startDate is monthStartDate
 		if(startDate.equals(monthStartDate)){
-		endDate = startDate.plusMonths(billingOrderData.getChargeDuration()).minusDays(1);
+		endDate = startDate.plusMonths(billingOrderData.getChargeDuration()).minusDays(1);//durationDate
 		}else{
 		endDate = startDate.dayOfMonth().withMaximumValue();
 		}
@@ -92,26 +94,28 @@ public class GenerateBill {
 		if (endDate.toDate().before(billingOrderData.getBillEndDate()) || endDate.toDate().equals(billingOrderData.getBillEndDate())) {
 			price = billingOrderData.getPrice().setScale(Integer.parseInt(roundingDecimal()));
 
-			if(billingOrderData.getChargeDuration()==12&&!startDate.equals(monthStartDate)){
+			if(billingOrderData.getChargeDuration()==12 && !startDate.equals(monthStartDate)){
 				int maximumDaysInYear = new  LocalDate().dayOfYear().withMaximumValue().getDayOfYear();
 				 pricePerDay = price.divide(new BigDecimal(maximumDaysInYear), Integer.parseInt(roundingDecimal()),RoundingMode.HALF_UP);
 				 
-			}else if(billingOrderData.getChargeDuration()==6&&!startDate.equals(monthStartDate)){
-				//int totalDays=Days.daysBetween(startDate, end)
-				pricePerDay = price.divide(new BigDecimal(180), Integer.parseInt(roundingDecimal()),RoundingMode.HALF_UP);
+			}else if(billingOrderData.getChargeDuration()==6 && !startDate.equals(monthStartDate)){
+				pricePerDay = price.divide(new BigDecimal(totalDays), Integer.parseInt(roundingDecimal()),RoundingMode.HALF_UP);
 				
-			}else if(billingOrderData.getChargeDuration()==3&&!startDate.equals(monthStartDate)){
-				pricePerDay = price.divide(new BigDecimal(90), Integer.parseInt(roundingDecimal()),RoundingMode.HALF_UP);
+			}else if(billingOrderData.getChargeDuration()==3 && !startDate.equals(monthStartDate)){
+				pricePerDay = price.divide(new BigDecimal(totalDays), Integer.parseInt(roundingDecimal()),RoundingMode.HALF_UP);
+				
+			}else if(billingOrderData.getChargeDuration()==2 && !startDate.equals(monthStartDate)){
+				pricePerDay = price.divide(new BigDecimal(totalDays), Integer.parseInt(roundingDecimal()),RoundingMode.HALF_UP);
 				
 			}else if(!startDate.equals(monthStartDate)){
-					 pricePerDay = price.divide(new BigDecimal(30), Integer.parseInt(roundingDecimal()),RoundingMode.HALF_UP);
+					 pricePerDay = price.divide(new BigDecimal(totalDays), Integer.parseInt(roundingDecimal()),RoundingMode.HALF_UP);
 			}
 			
 			int currentDay = startDate.getDayOfMonth();
 			int endOfMonth = startDate.dayOfMonth().withMaximumValue().getDayOfMonth();
-			int totalDays = endOfMonth - currentDay + 1;	
-			if (totalDays < endOfMonth) {
-				price = pricePerDay.multiply(new BigDecimal(totalDays));
+			int onlymonthyTotalDays = endOfMonth - currentDay + 1;	
+			if (onlymonthyTotalDays < endOfMonth) {
+				price = pricePerDay.multiply(new BigDecimal(onlymonthyTotalDays));
 			}
 
 		 } else if (endDate.toDate().after(billingOrderData.getBillEndDate())) {
@@ -226,9 +230,11 @@ public class GenerateBill {
 		BigDecimal price = null;
 		LocalDate invoiceTillDate = null;
 		LocalDate nextbillDate = null;
+		
 		startDate = new LocalDate(billingOrderData.getBillStartDate());
 		endDate = startDate.dayOfWeek().withMaximumValue();
 		LocalDate weekStartDate = startDate.dayOfWeek().withMinimumValue();
+		Plan plan = this.planRepository.findOne(billingOrderData.getPlanId());
 
 	/*	int startDateOfWeek = startDate.getDayOfMonth();
 		int endDateOfWeek = startDate.dayOfWeek().withMaximumValue().getDayOfMonth();*/
@@ -242,10 +248,9 @@ public class GenerateBill {
 		Integer billingDays = 7 * billingOrderData.getChargeDuration();
 
 		if (totalDays < billingDays) {
-			price = weeklyPricePerDay.multiply(new BigDecimal(totalDays));
-			Plan plan = this.planRepository.findOne(billingOrderData.getPlanId());
-		if(plan.getBillRule()==300&&startDate.compareTo(weekStartDate)>0){
-			price=BigDecimal.ZERO;
+			 price = weeklyPricePerDay.multiply(new BigDecimal(totalDays));
+		    if(plan.getBillRule()==300 && !startDate.equals(weekStartDate)){
+			 price=BigDecimal.ZERO;
 		}
 		} else if (totalDays == billingDays) {
 			price = billingOrderData.getPrice();
@@ -359,6 +364,8 @@ public class GenerateBill {
 	private BigDecimal getDisconnectionCredit(LocalDate startDate,
 			LocalDate endDate, BigDecimal amount, String durationType,Integer chargeDuration) {
        
+		LocalDate durationDate = startDate.plusMonths(chargeDuration).minusDays(1);
+		int divisibleDays=Days.daysBetween(startDate, durationDate).getDays()+1;
 		int maxDaysOfMonth = startDate.dayOfMonth().withMaximumValue().getDayOfMonth();
 		int maximumDaysInYear = new  LocalDate().dayOfYear().withMaximumValue().getDayOfYear();
 		BigDecimal pricePerDay = BigDecimal.ZERO.setScale(Integer.parseInt(roundingDecimal()));
@@ -376,10 +383,13 @@ public class GenerateBill {
 				pricePerDay=amount.divide(new BigDecimal(maximumDaysInYear), 2,RoundingMode.HALF_UP);
 					
 			}else if(chargeDuration==6){
-				pricePerDay=amount.divide(new BigDecimal(180), 2,RoundingMode.HALF_UP);
+				pricePerDay=amount.divide(new BigDecimal(divisibleDays), 2,RoundingMode.HALF_UP);
 					
 			}else if(chargeDuration==3){
-				pricePerDay=amount.divide(new BigDecimal(90), 2,RoundingMode.HALF_UP);
+				pricePerDay=amount.divide(new BigDecimal(divisibleDays), 2,RoundingMode.HALF_UP);
+					
+			}else if(chargeDuration==2){
+				pricePerDay=amount.divide(new BigDecimal(divisibleDays), 2,RoundingMode.HALF_UP);
 					
 			}else{	
 			   pricePerDay = amount.divide(new BigDecimal(maxDaysOfMonth), 2,RoundingMode.HALF_UP);
@@ -503,10 +513,6 @@ public class GenerateBill {
 					    	  taxAmount =taxFlat;
 					    	  }
 					     }
-					
-					/*taxPercentage = taxMappingRateData.getRate();
-					taxCode = taxMappingRateData.getTaxCode();
-					taxAmount = price.multiply(taxPercentage.divide(new BigDecimal(100)));*/	
 
 					invoiceTaxCommand = new InvoiceTaxCommand(clientId, null, null,
 							taxCode, null, taxPercentage, taxAmount);
@@ -602,13 +608,13 @@ public class GenerateBill {
 	// Dicount Percent calculation
 	public BigDecimal calculateDiscountPercentage(BigDecimal discountRate,BigDecimal chargePrice){
 		
-		return chargePrice.multiply(discountRate.divide(new BigDecimal(100)));
+		return chargePrice.multiply(discountRate.divide(new BigDecimal(100))).setScale(2,RoundingMode.HALF_UP);
 	}
 	
 	// Discount Flat calculation
 	public BigDecimal calculateDiscountFlat(BigDecimal discountRate,BigDecimal chargePrice){
 		
-		return chargePrice.subtract(discountRate);
+		return chargePrice.subtract(discountRate).setScale(2,RoundingMode.HALF_UP);
 	}
 	
 	// create billing order command

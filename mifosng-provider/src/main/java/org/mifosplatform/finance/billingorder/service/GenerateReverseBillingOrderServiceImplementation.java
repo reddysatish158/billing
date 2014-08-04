@@ -76,7 +76,6 @@ public class GenerateReverseBillingOrderServiceImplementation implements
 					// weekly
 				 else if (billingOrderData.getDurationType().equalsIgnoreCase("week(s)")) {
 
-					
 						billingOrderCommand = generateDisconnectionBill.getReverseWeeklyBill(billingOrderData,discountMasterData,disconnectDate);
 						billingOrderCommands.add(billingOrderCommand);
 
