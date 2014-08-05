@@ -141,6 +141,7 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
     private final HardwareAssociationReadplatformService hardwareAssociationReadplatformService;
     public final static String CPE_TYPE="CPE_TYPE";
     public final static String CONFIG_PROPERTY="Implicit Association";
+    public final static String CONFIG_DISCONNECT="Disconnection Credit";
     
 
     @Autowired
@@ -461,6 +462,9 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 			LocalDate disconnectionDate=command.localDateValueOfParameterNamed("disconnectionDate");
 			LocalDate currentDate = new LocalDate();
 			currentDate.toDate();
+			GlobalConfigurationProperty configurationProperty = this.configurationRepository.findOneByName(CONFIG_DISCONNECT);
+			if(configurationProperty.isEnabled()){
+			
 			List<OrderPrice> orderPrices=order.getPrice();
 			for(OrderPrice price:orderPrices){
 				price.updateDates(disconnectionDate);
@@ -526,11 +530,13 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 			//for TransactionHistory
 			transactionHistoryWritePlatformService.saveTransactionHistory(order.getClientId(),"Order Disconnection", new Date(),
 					"Price:"+order.getAllPriceAsString(),"PlanId:"+order.getPlanId(),"contarctPeriod:"+order.getContarctPeriod(),"Services:"+order.getAllServicesAsString(),"OrderID:"+order.getId(),"BillingAlign:"+order.getbillAlign());
-			return new CommandProcessingResult(Long.valueOf(order.getId()));
-		} catch (DataIntegrityViolationException dve) {
+		    } 
+		  return new CommandProcessingResult(Long.valueOf(order.getId()));	
+		}catch (DataIntegrityViolationException dve) {
 			handleCodeDataIntegrityIssues(null,dve);
 			return new CommandProcessingResult(Long.valueOf(-1));
 		}
+		
 	}
 
   
