@@ -19,3 +19,6 @@ INSERT IGNORE INTO m_permission VALUES (null,'billing', 'EMAILVERIFICATION_SELFC
 INSERT IGNORE INTO m_permission VALUES (null,'billing', 'SELFREGISTRATION_ACTIVATE', 'ACTIVATE', 'SELFREGISTRATION', 0);
 
 INSERT IGNORE INTO `c_configuration`(`id`,`name`,`enabled`,`value`) values (null,'Register_plan',1,'{"billAlign":false,"planCode":12,"contractPeriod":8,"paytermCode":"Monthly"}');
+
+
+

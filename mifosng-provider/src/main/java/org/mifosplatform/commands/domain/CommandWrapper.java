@@ -1140,6 +1140,6 @@ public class CommandWrapper {
 		}
 
 		public boolean isSelfRegistrationResource() {
-			return this.entityName.equalsIgnoreCase("ACTIVATE") && this.entityName.equalsIgnoreCase("SELFREGISTRATION");
+			return this.actionName.equalsIgnoreCase("SELFREGISTRATION") && this.entityName.equalsIgnoreCase("ACTIVATE");
 		}
 }
