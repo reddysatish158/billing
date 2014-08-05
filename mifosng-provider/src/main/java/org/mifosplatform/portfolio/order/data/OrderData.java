@@ -48,7 +48,7 @@ public class OrderData {
 	private List<OrderLineData> orderServices;
 	private List<OrderDiscountData> orderDiscountDatas;
 	private LocalDate invoiceTilldate;
-	private Collection<MCodeData> extensionReasonDatas;
+	private Collection<MCodeData> reasons;
 	private Collection<MCodeData> extensionPeriodDatas;
 	private String groupName;
 	private Long planStatus;
@@ -145,7 +145,7 @@ public class OrderData {
 			Collection<MCodeData> extensionReasonDatas) {
 		
 		this.extensionPeriodDatas=extensionPeriodDatas;
-		this.extensionReasonDatas=extensionReasonDatas;
+		this.reasons=extensionReasonDatas;
 	}
 	
 	public OrderData(Long planId,Long planStatus) {

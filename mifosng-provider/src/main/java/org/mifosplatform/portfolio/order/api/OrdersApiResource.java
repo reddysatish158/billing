@@ -359,17 +359,18 @@ public class OrdersApiResource {
 	}	   
 	
 	  @GET
-	  @Path("suspension")
+	  @Path("suspend")
 	  @Consumes({MediaType.APPLICATION_JSON})
 	  @Produces({MediaType.APPLICATION_JSON})
 	  public String getSuspentationReasons(@Context final UriInfo uriInfo) {
 		  
 	        context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 			Collection<MCodeData> ReasonDatas=this.mCodeReadPlatformService.getCodeValue("Suspension Reason");
-	        OrderData extensionData=new OrderData(null,ReasonDatas);
+	        OrderData orderData=new OrderData(null,ReasonDatas);
 	        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-	        return this.toApiJsonSerializer.serialize(settings, extensionData, RESPONSE_DATA_PARAMETERS);
+	        return this.toApiJsonSerializer.serialize(settings, orderData, RESPONSE_DATA_PARAMETERS);
 	    }
+	
 	@PUT
 	@Path("suspend/{orderId}")
 	@Consumes({ MediaType.APPLICATION_JSON })
@@ -379,5 +380,6 @@ public class OrdersApiResource {
 	final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 	return this.toApiJsonSerializer.serialize(result);
 	}
+	
 
 }
