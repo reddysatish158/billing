@@ -2388,6 +2388,15 @@ public CommandWrapperBuilder updateIpStatus() {
 	return this;
 	}
 
+public CommandWrapperBuilder suspendOrder(Long orderId) {
+	
+	this.actionName = "SUSPEND";
+	this.entityName = "ORDER";
+	this.entityId=orderId;
+	this.href = "suspend/"+orderId;
+	return this;
+}
+
 
 }
 

@@ -7,7 +7,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
-import org.apache.xmlbeans.impl.tool.XSTCTester.Harness;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
@@ -62,11 +61,18 @@ public class OneTimeSale extends AbstractAuditableCustom<AppUser, Long> {
 	@Column(name = "office_id")
 	private Long officeId;
 	
+	@Column(name="device_mode")
+	private String deviceMode;
+	
+	@Column(name="contract_period")
+	private Long contractPeriod;
+	
+	
 	public OneTimeSale(){}
 	
 	public OneTimeSale(Long clientId, Long itemId,String units,String quantity,
 			 String chargeCode, BigDecimal unitPrice,
-			BigDecimal totalPrice, LocalDate saleDate, Long discountId, Long officeId,String saleType) {
+			BigDecimal totalPrice, LocalDate saleDate, Long discountId, Long officeId,String saleType, Long contractPeriod) {
 
 	this.clientId=clientId;
 	this.itemId=itemId;
@@ -78,9 +84,11 @@ public class OneTimeSale extends AbstractAuditableCustom<AppUser, Long> {
 	this.saleDate=saleDate.toDate();
 	this.discountId=discountId;
 	this.officeId=officeId;
-		if(saleType.equalsIgnoreCase("SecondSale")){
+	if(saleType.equalsIgnoreCase("SECOND_SALE")){
 			this.deleted='y';
 		}
+	this.deviceMode=saleType;
+	this.contractPeriod=contractPeriod;
 	}
 
 	public Long getClientId() {
@@ -147,7 +155,8 @@ public class OneTimeSale extends AbstractAuditableCustom<AppUser, Long> {
 		    final LocalDate saleDate=command.localDateValueOfParameterNamed("saleDate");
 		    final Long discountId=command.longValueOfParameterNamed("discountId");
 		    final Long officeId=command.longValueOfParameterNamed("officeId");
-          return new OneTimeSale(clientId, itemId, units, quantity, chargeCode, unitPrice, totalPrice, saleDate,discountId,officeId,saleType);
+		    final Long contractPeriod=command.longValueOfParameterNamed("contractPeriod");
+          return new OneTimeSale(clientId, itemId, units, quantity, chargeCode, unitPrice, totalPrice, saleDate,discountId,officeId,saleType,contractPeriod);
 		 
 	}
 	public String getHardwareAllocated() {

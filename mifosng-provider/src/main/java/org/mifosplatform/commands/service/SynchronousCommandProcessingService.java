@@ -553,6 +553,8 @@ public class SynchronousCommandProcessingService implements
 				handler = applicationContext.getBean("orderExtensionCommandHandler",NewCommandSourceHandler.class);
 			}else if (wrapper.isOrderTerminate()) {
 				handler = applicationContext.getBean("orderTerminationCommandHandler",NewCommandSourceHandler.class);
+			}else if (wrapper.isOrderSuspend()) {
+				handler = applicationContext.getBean("orderSuspendCommandHandler",NewCommandSourceHandler.class);
 			}
 		} else if (wrapper.isOrderScheduling()) {
 			if (wrapper.isCreate()) {

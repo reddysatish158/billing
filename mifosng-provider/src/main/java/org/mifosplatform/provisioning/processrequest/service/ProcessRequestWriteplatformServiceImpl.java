@@ -2,6 +2,8 @@ package org.mifosplatform.provisioning.processrequest.service;
 
 import java.util.List;
 
+import org.mifosplatform.infrastructure.configuration.domain.EnumDomainService;
+import org.mifosplatform.infrastructure.configuration.domain.EnumDomainServiceRepository;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.domain.MifosPlatformTenant;
@@ -61,11 +63,12 @@ public class ProcessRequestWriteplatformServiceImpl implements ProcessRequestWri
 	  private final PrepareRequsetRepository prepareRequsetRepository;
 	  private final ProcessRequestRepository processRequestRepository;
 	  private final DataSourcePerTenantService dataSourcePerTenantService;
-	  private final ServiceParametersRepository serviceParametersRepository;
+	  private final EnumDomainServiceRepository enumDomainServiceRepository;
 	  private final ActionDetailsReadPlatformService actionDetailsReadPlatformService;
 	  private final PrepareRequestReadplatformService prepareRequestReadplatformService;
 	  private final ActiondetailsWritePlatformService actiondetailsWritePlatformService; 
-	  private final IpPoolManagementWritePlatformService ipPoolManagementWritePlatformService;
+
+	  
 	  
 
 	    @Autowired
@@ -74,7 +77,7 @@ public class ProcessRequestWriteplatformServiceImpl implements ProcessRequestWri
 	    		final OrderRepository orderRepository,final ProcessRequestRepository processRequestRepository,final PrepareRequsetRepository prepareRequsetRepository,
 	    		final ClientRepository clientRepository,final PlanRepository planRepository,final ActionDetailsReadPlatformService actionDetailsReadPlatformService,
 	    		final ActiondetailsWritePlatformService actiondetailsWritePlatformService,final PlatformSecurityContext context,
-	    		final ServiceParametersRepository serviceParametersRepository,final IpPoolManagementWritePlatformService ipPoolManagementWritePlatformService) {
+	    		final EnumDomainServiceRepository enumDomainServiceRepository) {
 	    	
 	    	    this.context = context;
 	    	    this.planRepository=planRepository;
@@ -84,12 +87,11 @@ public class ProcessRequestWriteplatformServiceImpl implements ProcessRequestWri
 	    	    this.prepareRequsetRepository=prepareRequsetRepository;
 	    	    this.processRequestRepository=processRequestRepository;
 	    	    this.orderReadPlatformService=orderReadPlatformService;
-	    	    this.serviceParametersRepository=serviceParametersRepository;
+	    	    this.enumDomainServiceRepository=enumDomainServiceRepository;
 	            this.dataSourcePerTenantService = dataSourcePerTenantService;
 	            this.actionDetailsReadPlatformService=actionDetailsReadPlatformService;
 	            this.prepareRequestReadplatformService=prepareRequestReadplatformService;
 	            this.actiondetailsWritePlatformService=actiondetailsWritePlatformService;
-	            this.ipPoolManagementWritePlatformService=ipPoolManagementWritePlatformService;
 	             
 	    }
 
@@ -171,6 +173,9 @@ public class ProcessRequestWriteplatformServiceImpl implements ProcessRequestWri
 												}
 											}
 									}*/
+							}else if(detailsData.getRequestType().equalsIgnoreCase(UserActionStatusTypeEnum.SUSPENTATION.toString())){
+								EnumDomainService enumDomainService=this.enumDomainServiceRepository.findOneByEnumMessageProperty(StatusTypeEnum.SUSPENDED.toString());
+								order.setStatus(enumDomainService.getEnumId());
 							}
 							else{
 								order.setStatus(OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.ACTIVE).getId());

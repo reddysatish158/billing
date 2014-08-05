@@ -33,6 +33,10 @@ public class OrderStatusEnumaration {
 		case TERMINATED:
 			optionData =new EnumOptionData(StatusTypeEnum.TERMINATED.getValue().longValue(),codePrefix+StatusTypeEnum.TERMINATED,"TERMINATED");
 			break;	
+		
+		case SUSPENDED:
+			optionData =new EnumOptionData(StatusTypeEnum.SUSPENDED.getValue().longValue(),codePrefix+StatusTypeEnum.SUSPENDED,"SUSPENDED");
+			break;	
 
 		default:
 			optionData = new EnumOptionData(StatusTypeEnum.INVALID.getValue().longValue(), StatusTypeEnum.INVALID.getCode(), "INVALID");

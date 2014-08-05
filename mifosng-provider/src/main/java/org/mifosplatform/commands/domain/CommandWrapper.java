@@ -1134,4 +1134,8 @@ public class CommandWrapper {
 		public boolean isUpdateIpStatus() {
 			return this.actionName.equalsIgnoreCase("UPDATEIPSTATUS") && this.entityName.equalsIgnoreCase("IPPOOLMANAGEMENT");
 		}
+
+		public boolean isOrderSuspend() {
+			return this.actionName.equalsIgnoreCase("SUSPEND") && this.entityName.equalsIgnoreCase("ORDER");
+		}
 }
