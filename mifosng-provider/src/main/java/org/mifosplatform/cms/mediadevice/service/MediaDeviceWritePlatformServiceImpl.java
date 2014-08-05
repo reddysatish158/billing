@@ -2,7 +2,7 @@ package org.mifosplatform.cms.mediadevice.service;
 
 
 import org.mifosplatform.billing.selfcare.domain.SelfCare;
-import org.mifosplatform.billing.selfcare.service.SelfCareIdNotFoundException;
+import org.mifosplatform.billing.selfcare.exception.SelfCareIdNotFoundException;
 import org.mifosplatform.billing.selfcare.service.SelfCareRepository;
 import org.mifosplatform.cms.mediadevice.exception.DeviceDetailsInActiveException;
 import org.mifosplatform.cms.mediadevice.exception.DeviceIdNotFoundException;
@@ -100,7 +100,7 @@ public class MediaDeviceWritePlatformServiceImpl implements MediaDeviceWritePlat
 			String crashReportString = command.stringValueOfParameterNamed("crashReportString");
 			SelfCare selfCare = SelfCareRetrieveByClientId(clientId);
 			selfCare.setStatus("INACTIVE");		
-			String message = this.messagePlatformEmailService.sendMediaDeviceCrashEmailSending("shiva@openbillingsystem.com",crashReportString);
+			String message = this.messagePlatformEmailService.sendGeneralMessage("shiva@openbillingsystem.com",crashReportString,"Crash Api Report");
 			if(message.equalsIgnoreCase("Success")){
 				message = clientId.toString();
 			}

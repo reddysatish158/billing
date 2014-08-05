@@ -1,9 +1,5 @@
-/**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
- */
 package org.mifosplatform.portfolio.activationprocess.api;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -25,16 +21,12 @@ import org.springframework.stereotype.Component;
 public class ActivationProcessApiResource {
 
     private final ToApiJsonSerializer<ClientData> toApiJsonSerializer;
-
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
-    public ActivationProcessApiResource(
-             final ToApiJsonSerializer<ClientData> toApiJsonSerializer,
+    public ActivationProcessApiResource(final ToApiJsonSerializer<ClientData> toApiJsonSerializer,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
-     
         this.toApiJsonSerializer = toApiJsonSerializer;
-    
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
   
     }
@@ -48,6 +40,19 @@ public class ActivationProcessApiResource {
                 .activateProcess() //
                 .withJson(apiRequestBodyAsJson) //
                 .build(); //
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        return this.toApiJsonSerializer.serialize(result);
+    }
+    
+    @POST
+    @Path("selfregistration")
+    @Consumes({ MediaType.APPLICATION_JSON }) 
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String createSelfRegistration(final String apiRequestBodyAsJson) {
+
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().selfRegistrationProcess().withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 

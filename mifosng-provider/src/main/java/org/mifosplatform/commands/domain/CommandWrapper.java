@@ -272,7 +272,7 @@ public class CommandWrapper {
     }
     
     public boolean isActivationProcessResource() {
-        return this.entityName.equalsIgnoreCase("ACTIVATE");
+        return this.entityName.equalsIgnoreCase("ACTIVATE") && this.entityName.equalsIgnoreCase("ACTIVATIONPROCESS");
     }
 
     public boolean isClientActivation() {
@@ -760,7 +760,7 @@ public class CommandWrapper {
 		}
 
 		public boolean isSelfCare() {
-			return this.entityName.equalsIgnoreCase("SELFCARE") && this.actionName.equalsIgnoreCase("CREATE");
+			return this.entityName.equalsIgnoreCase("SELFCARE");
 		}
 		
 		public boolean isSelfCareUDP() {
@@ -1129,5 +1129,17 @@ public class CommandWrapper {
 		}
 		public boolean isDeleteEventValidation() {
 			return this.actionName.equalsIgnoreCase("DELETE") && this.entityName.equalsIgnoreCase("EVENTVALIDATION");
+		}
+
+		public boolean isSelfCareRegister() {
+			return this.actionName.equalsIgnoreCase("REGISTER") && this.entityName.equalsIgnoreCase("SELFCARE");
+		}
+
+		public boolean isSelfCareEmailVerification() {
+			return this.actionName.equalsIgnoreCase("EMAILVERIFICATION") && this.entityName.equalsIgnoreCase("SELFCARE");
+		}
+
+		public boolean isSelfRegistrationResource() {
+			return this.entityName.equalsIgnoreCase("ACTIVATE") && this.entityName.equalsIgnoreCase("SELFREGISTRATION");
 		}
 }
