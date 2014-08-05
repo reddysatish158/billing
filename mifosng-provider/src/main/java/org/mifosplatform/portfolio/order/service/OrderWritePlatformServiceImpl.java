@@ -481,7 +481,6 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 			LocalDate currentDate = new LocalDate();
 			currentDate.toDate();
 			GlobalConfigurationProperty configurationProperty = this.configurationRepository.findOneByName(CONFIG_DISCONNECT);
-			if(configurationProperty.isEnabled()){
 			
 			List<OrderPrice> orderPrices=order.getPrice();
 			for(OrderPrice price:orderPrices){
@@ -499,10 +498,13 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 			
 				orderStatus = OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.PENDING).getId();
 				
-			}if(plan.getBillRule() !=400 && plan.getBillRule() !=300){ 
+				
+			}if(configurationProperty.isEnabled()){
+			if(plan.getBillRule() !=400 && plan.getBillRule() !=300){ 
 	          
 				this.reverseInvoice.reverseInvoiceServices(orderId, order.getClientId(),disconnectionDate);
 	        }
+			}
 			order.update(command,orderStatus);
 			order.setuserAction(UserActionStatusTypeEnum.DISCONNECTION.toString());
 			this.orderRepository.saveAndFlush(order);
@@ -548,7 +550,6 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 			//for TransactionHistory
 			transactionHistoryWritePlatformService.saveTransactionHistory(order.getClientId(),"Order Disconnection", new Date(),
 					"Price:"+order.getAllPriceAsString(),"PlanId:"+order.getPlanId(),"contarctPeriod:"+order.getContarctPeriod(),"Services:"+order.getAllServicesAsString(),"OrderID:"+order.getId(),"BillingAlign:"+order.getbillAlign());
-		    } 
 		  return new CommandProcessingResult(Long.valueOf(order.getId()));	
 		}catch (DataIntegrityViolationException dve) {
 			handleCodeDataIntegrityIssues(null,dve);
