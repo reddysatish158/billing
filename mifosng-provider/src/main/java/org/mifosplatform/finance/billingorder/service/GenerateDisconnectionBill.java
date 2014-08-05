@@ -116,7 +116,7 @@ public class GenerateDisconnectionBill {
 				
 			} else if (billingOrderData.getBillingAlign().equalsIgnoreCase("Y")) {
                 if(numberOfMonths>0){
-				 LocalDate tempBillEndDate = invoiceTillDate.minusMonths(numberOfMonths).dayOfMonth().withMaximumValue();
+				 LocalDate tempBillEndDate = invoiceTillDate.minusMonths(numberOfMonths);//.dayOfMonth().withMaximumValue();
 				 numberOfDays = Days.daysBetween(disconnectionDate, tempBillEndDate).getDays();
 				 System.out.println(numberOfDays);
                 }
@@ -423,7 +423,7 @@ public class GenerateDisconnectionBill {
 				if (taxMappingRateData.getTaxType().equalsIgnoreCase("Percentage")) {
 					taxPercentage = taxMappingRateData.getRate();
 					taxCode = taxMappingRateData.getTaxCode();
-					taxAmount = price.multiply(taxPercentage.divide(new BigDecimal(100)));
+					taxAmount = price.multiply(taxPercentage.divide(new BigDecimal(100))).setScale(2, RoundingMode.HALF_UP);
 				} else if(taxMappingRateData.getTaxType().equalsIgnoreCase("Flat")) {
 					taxFlat = taxMappingRateData.getRate();
 					taxCode = taxMappingRateData.getTaxCode();
