@@ -24,7 +24,7 @@ import com.google.gson.reflect.TypeToken;
 @Component
 public class SelfCareCommandFromApiJsonDeserializer {
 
-private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("clientId","userName","password","uniqueReference","isDeleted"));
+private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("clientId","userName","password","uniqueReference","isDeleted","returnUrl","verificationKey"));
 
     
     private final FromJsonHelper fromApiJsonHelper;

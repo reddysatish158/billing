@@ -194,6 +194,32 @@ public class SelfCareApiResource {
 
         return this.toApiJsonSerializerForItem.serialize(result);
     }
+    
+    @POST
+    @Path("register")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String registerSelfCare(final String jsonRequestBody) {
+
+		final CommandWrapper commandRequest = new CommandWrapperBuilder().registerSelfCareRegister().withJson(jsonRequestBody).build();
+		final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+	    return this.toApiJsonSerializerForItem.serialize(result);	
+	    
+	}
+    
+    @PUT
+    @Path("register")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String SelfCareEmailVerication(final String jsonRequestBody) {
+
+		final CommandWrapper commandRequest = new CommandWrapperBuilder().SelfCareEmailVerification().withJson(jsonRequestBody).build();
+		final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+	    return this.toApiJsonSerializerForItem.serialize(result);	
+	    
+	}
+    
+    
 
 
 

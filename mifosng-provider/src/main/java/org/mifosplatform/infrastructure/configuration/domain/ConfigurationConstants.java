@@ -15,6 +15,7 @@ public class ConfigurationConstants {
 	public static final String CPE_TYPE="CPE_TYPE";
 	public static final String CONFIR_PROPERTY_SALE="SALE";
 	public static final String CONFIR_PROPERTY_OWN="OWN";
+	public static final String CONFIR_PROPERTY_SELF_REGISTRATION="Register_plan";
 
 	public static final String ENABLED = "enabled";
 	public static final String VALUE = "value";
