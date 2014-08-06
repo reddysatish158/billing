@@ -2,7 +2,13 @@ package org.mifosplatform.billing.selfcare.service;
 
 import java.util.Date;
 
+import org.apache.commons.lang.RandomStringUtils;
 import org.mifosplatform.billing.selfcare.domain.SelfCare;
+import org.mifosplatform.billing.selfcare.domain.SelfCareTemporary;
+import org.mifosplatform.billing.selfcare.domain.SelfCareTemporaryRepository;
+import org.mifosplatform.billing.selfcare.exception.SelfCareAlreadyVerifiedException;
+import org.mifosplatform.billing.selfcare.exception.SelfCareEmailIdDuplicateException;
+import org.mifosplatform.billing.selfcare.exception.SelfCareTemporaryGeneratedKeyNotFoundException;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -12,6 +18,7 @@ import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.core.service.PlatformEmailService;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.infrastructure.security.service.RandomPasswordGenerator;
+import org.mifosplatform.organisation.message.service.MessagePlatformEmailService;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
 import org.mifosplatform.portfolio.client.exception.ClientStatusException;
 import org.mifosplatform.portfolio.transactionhistory.service.TransactionHistoryWritePlatformService;
@@ -33,11 +40,17 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 	private SelfCareReadPlatformService selfCareReadPlatformService;
 	private PlatformEmailService platformEmailService; 
 	private TransactionHistoryWritePlatformService transactionHistoryWritePlatformService;
+	private MessagePlatformEmailService messagePlatformEmailService;
+	private SelfCareTemporaryRepository selfCareTemporaryRepository;
 	
 	private final static Logger logger = (Logger) LoggerFactory.getLogger(SelfCareWritePlatformServiceImp.class);
 	
 	@Autowired
-	public SelfCareWritePlatformServiceImp(final PlatformSecurityContext context, final SelfCareRepository selfCareRepository, final FromJsonHelper fromJsonHelper, final SelfCareCommandFromApiJsonDeserializer selfCareCommandFromApiJsonDeserializer, final SelfCareReadPlatformService selfCareReadPlatformService, final PlatformEmailService platformEmailService, final TransactionHistoryWritePlatformService transactionHistoryWritePlatformService) {
+	public SelfCareWritePlatformServiceImp(final PlatformSecurityContext context, final SelfCareRepository selfCareRepository, 
+			final FromJsonHelper fromJsonHelper, final SelfCareCommandFromApiJsonDeserializer selfCareCommandFromApiJsonDeserializer, 
+			final SelfCareReadPlatformService selfCareReadPlatformService, final PlatformEmailService platformEmailService, 
+			final TransactionHistoryWritePlatformService transactionHistoryWritePlatformService, 
+			final SelfCareTemporaryRepository selfCareTemporaryRepository, final MessagePlatformEmailService messagePlatformEmailService){
 		this.context = context;
 		this.selfCareRepository = selfCareRepository;
 		this.fromJsonHelper = fromJsonHelper;
@@ -45,6 +58,8 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 		this.selfCareReadPlatformService = selfCareReadPlatformService;
 		this.platformEmailService = platformEmailService;
 		this.transactionHistoryWritePlatformService = transactionHistoryWritePlatformService;
+		this.selfCareTemporaryRepository = selfCareTemporaryRepository;
+		this.messagePlatformEmailService = messagePlatformEmailService;
 	}
 	
 	@Override
@@ -158,6 +173,98 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
             	return new CommandProcessingResult(Long.valueOf(-1));
             }
 
+	}
+
+	@Override
+	public CommandProcessingResult registerSelfCare(JsonCommand command) {
+		
+		SelfCareTemporary selfCareTemporary = null;
+		Long clientId = 0L;
+		try{
+			context.authenticatedUser();
+			selfCareCommandFromApiJsonDeserializer.validateForCreate(command);
+			String userName = command.stringValueOfParameterNamed("userName");
+			String returnUrl = command.stringValueOfParameterNamed("returnUrl");
+			SelfCare repository=selfCareRepository.findOneByEmailId(userName);
+			if(repository != null){				
+				throw new SelfCareEmailIdDuplicateException(userName);				
+			}else{		
+				selfCareTemporary = SelfCareTemporary.fromJson(command);
+				String unencodedPassword = RandomStringUtils.randomAlphanumeric(27);
+				selfCareTemporary.setGeneratedKey(unencodedPassword);
+				
+				selfCareTemporaryRepository.save(selfCareTemporary);
+				String generatedKey = selfCareTemporary.getGeneratedKey() + "11011";
+				
+				StringBuilder body = new StringBuilder();
+				body.append("hi");
+				body.append("\n");
+				body.append("\n");
+				body.append("Your Registration has been successfully completed.");
+				body.append("\n");
+				body.append("To approve this Registration please click on this link:");
+				body.append("\n");
+				body.append("URL: " + returnUrl + generatedKey);
+				body.append("\n");
+				body.append("\n");
+				body.append("Thankyou");
+				
+				String subject = "Register Conformation";
+				
+					
+				String result = messagePlatformEmailService.sendGeneralMessage(selfCareTemporary.getUserName(), body.toString(), subject);
+					
+				transactionHistoryWritePlatformService.saveTransactionHistory(clientId, "Self Care User Registration", new Date(),
+						"EmailId: "+selfCareTemporary.getUserName() + ", returnUrl: "+ returnUrl +", Email Sending Resopnse: " + result);
+				
+			}
+				
+		}catch(DataIntegrityViolationException dve){
+			handleDataIntegrityIssues(command, dve);
+			throw new PlatformDataIntegrityException("duplicate.username", "duplicate.username","duplicate.username", "duplicate.username");
+		}catch(EmptyResultDataAccessException emp){
+			throw new PlatformDataIntegrityException("empty.result.set", "empty.result.set");
+		}
+		
+		return new CommandProcessingResultBuilder().withEntityId(selfCareTemporary.getId()).build();
+	}
+
+	@Override
+	public CommandProcessingResult selfCareEmailVerification(JsonCommand command) {
+		SelfCareTemporary selfCareTemporary = null;
+		Long clientId = 0L;
+		try{
+			context.authenticatedUser();
+			selfCareCommandFromApiJsonDeserializer.validateForCreate(command);
+			String verificationKey = command.stringValueOfParameterNamed("verificationKey");
+			
+			selfCareTemporary =selfCareTemporaryRepository.findOneByGeneratedKey(verificationKey);
+			
+			if(selfCareTemporary == null){				
+				throw new SelfCareTemporaryGeneratedKeyNotFoundException(verificationKey);				
+			}else{		
+				
+				if(selfCareTemporary.getStatus().equalsIgnoreCase("INACTIVE")){
+					
+					selfCareTemporary.setStatus("ACTIVE");
+					
+					transactionHistoryWritePlatformService.saveTransactionHistory(clientId, "Self Care User Registration is Verified Through Email", new Date(),
+							"EmailId: "+selfCareTemporary.getUserName());			
+				} else{
+					transactionHistoryWritePlatformService.saveTransactionHistory(clientId, "Self Care User Registration is Already Verified Through this GeneratedKey"+verificationKey, new Date(),
+							"EmailId: "+selfCareTemporary.getUserName());	
+					throw new SelfCareAlreadyVerifiedException(verificationKey);		
+				}
+			}
+				
+		}catch(DataIntegrityViolationException dve){
+			handleDataIntegrityIssues(command, dve);
+			throw new PlatformDataIntegrityException("duplicate.username", "duplicate.username","duplicate.username", "duplicate.username");
+		}catch(EmptyResultDataAccessException emp){
+			throw new PlatformDataIntegrityException("empty.result.set", "empty.result.set");
+		}
+		
+		return new CommandProcessingResultBuilder().withEntityId(selfCareTemporary.getId()).build();
 	}
 	
 }

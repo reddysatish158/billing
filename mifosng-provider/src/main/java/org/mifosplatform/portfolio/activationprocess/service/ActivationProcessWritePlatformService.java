@@ -12,6 +12,6 @@ public interface ActivationProcessWritePlatformService {
 
     CommandProcessingResult activationProcess(JsonCommand command);
 
-	
+	CommandProcessingResult selfRegistrationProcess(JsonCommand command);
 
 }

@@ -2396,6 +2396,26 @@ public CommandWrapperBuilder suspendOrder(Long orderId) {
 	this.href = "suspend/"+orderId;
 	return this;
 }
+public CommandWrapperBuilder registerSelfCareRegister() {
+	this.actionName = "REGISTER";
+	this.entityName = "SELFCARE";
+	this.href = "/selfcare/register";
+	return this;
+}
+
+public CommandWrapperBuilder SelfCareEmailVerification() {
+	this.actionName = "EMAILVERIFICATION";
+	this.entityName = "SELFCARE";
+	this.href = "/selfcare/register";
+	return this;
+}
+
+public CommandWrapperBuilder selfRegistrationProcess() {
+	this.actionName = "SELFREGISTRATION";
+	this.entityName = "ACTIVATE";
+	this.href = "/activationprocess/selfregistration";
+	return this;
+}
 
 
 }

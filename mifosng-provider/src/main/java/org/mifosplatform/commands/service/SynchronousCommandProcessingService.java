@@ -822,7 +822,13 @@ public class SynchronousCommandProcessingService implements
 		    }else if(wrapper.isSelfCare()){
 			    	   if(wrapper.isCreate()){
 			    		   handler = applicationContext.getBean("createSelfCareCommandHandler",NewCommandSourceHandler.class);
-			    	   }
+			    	   } else if(wrapper.isSelfCareRegister()) {
+			        		handler = applicationContext.getBean("registerSelfCareCommandHandler",NewCommandSourceHandler.class);	
+					   } else if(wrapper.isSelfCareEmailVerification()) {
+			        		handler = applicationContext.getBean("emailVerificationSelfCareCommandHandler",NewCommandSourceHandler.class);	
+					   } else{
+				           throw new UnsupportedCommandException(wrapper.commandName());
+				       }
 			}else if(wrapper.isSelfCareUDP()){
 		    	   if(wrapper.isCreateSelfCareUDP()){
 		    		   handler = applicationContext.getBean("createSelfCareUDPCommandHandler",NewCommandSourceHandler.class);
@@ -1079,6 +1085,8 @@ public class SynchronousCommandProcessingService implements
 					   }else{
 				           throw new UnsupportedCommandException(wrapper.commandName());
 				       }
+			    }else if(wrapper.isSelfRegistrationResource()){
+			        		handler = applicationContext.getBean("createSelfRegistrationCommandHandler",NewCommandSourceHandler.class);
 			    }else {
 			               throw new UnsupportedCommandException(wrapper.commandName());
 		       }
