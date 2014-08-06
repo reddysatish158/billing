@@ -1,8 +1,6 @@
 package org.mifosplatform.organisation.ippool.service;
 
 import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections.map.HashedMap;
@@ -57,47 +55,37 @@ public class IpPoolManagementWritePlatformServiceImpl implements IpPoolManagemen
 			Long subnet=command.longValueOfParameterNamed("subnet");
 			String notes=command.stringValueOfParameterNamed("notes");
 			Long type=command.longValueOfParameterNamed("type");
-
 			Map<String,Object> generatedIPPoolID=new HashedMap();
-			
+
 			if(subnet !=null){
-				
 				String ipData=ipAddress+"/"+subnet;
 				IpGeneration util=new IpGeneration(ipData,this.ipPoolManagementReadPlatformService);
 				String[] data=util.getInfo().getAllAddresses();
-				//String[] data=this.ipGeneration.getInfo().getAllAddresses(ipData);
-				
-				for(int i=0;i<data.length;i++){
-					int j=i+1;
-					IpPoolManagementDetail ipPoolManagementDetail= new IpPoolManagementDetail(data[i],'I',type,notes,subnet);
-					this.ipPoolManagementJpaRepository.save(ipPoolManagementDetail);
-					generatedIPPoolID.put(String.valueOf(j), ipPoolManagementDetail.getId());
-				}
-				
+					for(int i=0;i<data.length;i++){
+						int j=i+1;
+						IpPoolManagementDetail ipPoolManagementDetail= new IpPoolManagementDetail(data[i],'I',type,notes,subnet);
+						this.ipPoolManagementJpaRepository.save(ipPoolManagementDetail);
+						generatedIPPoolID.put(String.valueOf(j), ipPoolManagementDetail.getId());
+					}
 			}else{
 				String i="1";
 				IpPoolManagementDetail ipPoolManagementDetail= new IpPoolManagementDetail(ipAddress,'I',type,notes,null);
-
 				this.ipPoolManagementJpaRepository.save(ipPoolManagementDetail);
 				generatedIPPoolID.put(i, ipPoolManagementDetail.getId());
 			}
-	
 			return new CommandProcessingResultBuilder().with(generatedIPPoolID).build();
-
-			
-		}catch(DataIntegrityViolationException dve){
-			
-				 Throwable realCause = dve.getMostSpecificCause();
-			        if (realCause.getMessage().contains("unique_ip")) {
-			            final String name = command.stringValueOfParameterNamed("unique_ip");
-			            throw new PlatformDataIntegrityException("error.msg.code.duplicate.name", "A code with name '" + name + "' already exists");
-			        }else if (realCause.getMessage().contains("ip_address")) {
-			        	 final String name = command.stringValueOfParameterNamed("ip_address");
-				            throw new PlatformDataIntegrityException("error.msg.code.duplicate.name", "A code with name '" + name + "' already exists");
-			        }
-			    	return new CommandProcessingResult(new Long(1));
-		}
 		
+		}catch(DataIntegrityViolationException dve){
+			Throwable realCause = dve.getMostSpecificCause();
+				if (realCause.getMessage().contains("unique_ip")) {
+					final String name = command.stringValueOfParameterNamed("unique_ip");
+					throw new PlatformDataIntegrityException("error.msg.code.duplicate.name", "A code with name '" + name + "' already exists");
+			   }else if (realCause.getMessage().contains("ip_address")) {
+				   final String name = command.stringValueOfParameterNamed("ip_address");
+				   	throw new PlatformDataIntegrityException("error.msg.code.duplicate.name", "A code with name '" + name + "' already exists");
+			   }
+			    	return new CommandProcessingResult(new Long(1));
+			}
 	}
 
 	@Transactional
@@ -160,30 +148,70 @@ public class IpPoolManagementWritePlatformServiceImpl implements IpPoolManagemen
 		
 		context.authenticatedUser();
 		this.apiJsonDeserializer.validateForUpdateDecription(command.json());
-		Map<String,Object> generatedIPPoolID=new HashedMap();
+			Map<String,Object> generatedIPPoolID=new HashedMap();
+			String search = command.stringValueOfParameterNamed("ipAndSubnet");
+			IpGeneration ipGeneration = new IpGeneration(search,this.ipPoolManagementReadPlatformService);
+			String[] data = ipGeneration.getInfo().getsubnetAddresses();
+			String ipPoolDescription=ipGeneration.getInfo().getNetmask();
+			
+				for(int i=0;i<data.length;i++){
+					int j=i+1;
+					IpPoolManagementData ipPoolManagementData=this.ipPoolManagementReadPlatformService.retrieveIdByIpAddress(data[i]);
+					IpPoolManagementDetail ipPoolManagementDetail = this.ipPoolManagementJpaRepository.findOne(ipPoolManagementData.getId());
+					ipPoolManagementDetail.setIpPoolDescription(ipPoolDescription); // netMask id
+					this.ipPoolManagementJpaRepository.save(ipPoolManagementDetail);
+					generatedIPPoolID.put(String.valueOf(j), ipPoolManagementDetail.getId());
+				}
+				return new CommandProcessingResultBuilder().with(generatedIPPoolID).build();
+	}
+
+	@Override
+	public CommandProcessingResult updateIpAddressStatus(JsonCommand command) {
 		
-		String search = command.stringValueOfParameterNamed("ipAndSubnet");
-		IpGeneration ipGeneration = new IpGeneration(search,this.ipPoolManagementReadPlatformService);
-		String[] data = ipGeneration.getInfo().getsubnetAddresses();
-		//ipGeneration.getInfo().getNetmask();
-		//List<IpPoolManagementData> ipPoolManagementDatas=new ArrayList<IpPoolManagementData>();
-		String ipPoolDescription=ipGeneration.getInfo().getNetmask();
+		try{
 		
-    	for(int i=0;i<data.length;i++){
-    		
-			int j=i+1;
-			IpPoolManagementData ipPoolManagementData=this.ipPoolManagementReadPlatformService.retrieveIdByIpAddress(data[i]);
-			
-			
-			IpPoolManagementDetail ipPoolManagementDetail = this.ipPoolManagementJpaRepository.findOne(ipPoolManagementData.getId());
-			ipPoolManagementDetail.setIpPoolDescription(ipPoolDescription); // netMask id
-			
-			this.ipPoolManagementJpaRepository.save(ipPoolManagementDetail);
-			generatedIPPoolID.put(String.valueOf(j), ipPoolManagementDetail.getId());
+				String[] ipAddressArray=null;
+			 		final String ipValue=command.stringValueOfParameterNamed("ipAddress");
+			 		final String status=command.stringValueOfParameterNamed("status");
+			 		IpPoolManagementDetail ipPoolManagementDetail= this.ipPoolManagementJpaRepository.findAllocatedIpAddressData(ipValue);
+			 		
+			 		if(ipPoolManagementDetail != null){
+			 			ipPoolManagementDetail.setStatus(status.trim().charAt(0));
+			 			ipPoolManagementDetail.setClientId(null);
+			 			this.ipPoolManagementJpaRepository.save(ipPoolManagementDetail);
+			 		}
+			 	
+			/*if(ipValue.contains("/")){
+			    IpGeneration ipGeneration=new IpGeneration(ipValue,this.ipPoolManagementReadPlatformService);
+				 ipAddressArray=ipGeneration.getInfo().getsubnetAddresses();
+				          
+				        for(int i=0;i<ipAddressArray.length;i++){
+				    	    IpPoolManagementDetail ipPoolManagementDetail= this.ipPoolManagementJpaRepository.findAllocatedIpAddressData(ipAddressArray[i]);
+					  
+				    	    	if(ipPoolManagementDetail != null){
+				    	    		ipPoolManagementDetail.setStatus(status.charAt(0));
+				    	    		ipPoolManagementDetail.setClientId(null);
+				    	    		this.ipPoolManagementJpaRepository.save(ipPoolManagementDetail);
+				    	    	}
+				        }
+			}else{
+					
+				JSONArray ipAddresses = new  JSONArray(ipValue);
+  	            	for(int i=0;i<ipAddresses.length();i++){
+  	            		IpPoolManagementDetail ipPoolManagementDetail= this.ipPoolManagementJpaRepository.findAllocatedIpAddressData(ipAddresses.getString(i));
+  	            			if(ipPoolManagementDetail != null){
+  	            				ipPoolManagementDetail.setStatus(status.charAt(0));
+  	            				ipPoolManagementDetail.setClientId(null);
+  	            				this.ipPoolManagementJpaRepository.save(ipPoolManagementDetail);
+  	            			}
+  	            	}
+			}*/
+		    
+			return new CommandProcessingResult(1l);
+		}catch(DataIntegrityViolationException exception){
+		 exception.printStackTrace();
+		 return null;
 		}
-    	
-    	return new CommandProcessingResultBuilder().with(generatedIPPoolID).build();
-		//return null;
 	}
 	
 	

@@ -210,9 +210,6 @@ public class OrdersApiResource {
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
     	List<SubscriptionData> contractPeriods=this.planReadPlatformService.retrieveSubscriptionData();
     	GlobalConfigurationProperty configurationProperty=this.configurationRepository.findOneByName(CONFIG_PROPERTY);
-    
-    //	List<SubscriptionData> datas=contractPeriods;
-    	//for(SubscriptionData data : datas){
     	for(int i=0;i<contractPeriods.size();i++){
     		if(contractPeriods.get(i).getContractdata().equalsIgnoreCase("Perpetual")){
     			contractPeriods.remove(contractPeriods.get(i));
@@ -360,6 +357,29 @@ public class OrdersApiResource {
 	  final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 	  return this.toApiJsonSerializer.serialize(result);
 	}	   
-
+	
+	  @GET
+	  @Path("suspend")
+	  @Consumes({MediaType.APPLICATION_JSON})
+	  @Produces({MediaType.APPLICATION_JSON})
+	  public String getSuspentationReasons(@Context final UriInfo uriInfo) {
+		  
+	        context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
+			Collection<MCodeData> ReasonDatas=this.mCodeReadPlatformService.getCodeValue("Suspension Reason");
+	        OrderData orderData=new OrderData(null,ReasonDatas);
+	        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+	        return this.toApiJsonSerializer.serialize(settings, orderData, RESPONSE_DATA_PARAMETERS);
+	    }
+	
+	@PUT
+	@Path("suspend/{orderId}")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String suspendOrder(@PathParam("orderId") final Long orderId,final String apiRequestBodyAsJson) {
+    final CommandWrapper commandRequest = new CommandWrapperBuilder().suspendOrder(orderId).withJson(apiRequestBodyAsJson).build();
+	final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+	return this.toApiJsonSerializer.serialize(result);
+	}
+	
 
 }

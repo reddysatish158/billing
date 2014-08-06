@@ -101,6 +101,7 @@ public class GenerateBill {
 			}else if(billingOrderData.getChargeDuration()==6 && !startDate.equals(monthStartDate)){
 				pricePerDay = price.divide(new BigDecimal(totalDays), Integer.parseInt(roundingDecimal()),RoundingMode.HALF_UP);
 				
+
 			}else if(billingOrderData.getChargeDuration()==3 && !startDate.equals(monthStartDate)){
 				pricePerDay = price.divide(new BigDecimal(totalDays), Integer.parseInt(roundingDecimal()),RoundingMode.HALF_UP);
 				
@@ -109,6 +110,7 @@ public class GenerateBill {
 				
 			}else if(!startDate.equals(monthStartDate)){
 					 pricePerDay = price.divide(new BigDecimal(totalDays), Integer.parseInt(roundingDecimal()),RoundingMode.HALF_UP);
+
 			}
 			
 			int currentDay = startDate.getDayOfMonth();
@@ -390,6 +392,9 @@ public class GenerateBill {
 					
 			}else if(chargeDuration==2){
 				pricePerDay=amount.divide(new BigDecimal(divisibleDays), 2,RoundingMode.HALF_UP);
+					
+			}else if(chargeDuration==2){
+				pricePerDay=amount.divide(new BigDecimal(60), 2,RoundingMode.HALF_UP);
 					
 			}else{	
 			   pricePerDay = amount.divide(new BigDecimal(maxDaysOfMonth), 2,RoundingMode.HALF_UP);

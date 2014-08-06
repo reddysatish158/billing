@@ -2,9 +2,9 @@ package org.mifosplatform.infrastructure.jobs.service;
 
 public enum JobName {
 
-    INVOICE("Invoice"),REQUESTOR("Requestor"),RESPONSOR("Responser"),SIMULATOR("Simulator"),PUSH_NOTIFICATION("PushNotification"),
-    GENERATE_STATEMENT("Generate Statement"),MESSAGE_MERGE("Messanger"),AUTO_EXIPIRY("Auto Exipiry"), Middleware("Middleware"),
-    EVENT_ACTION_PROCESSOR("EventAction Processor"),REPORT_EMAIL("Report Email"),REPORT_STATMENT("Generate PDF");
+    INVOICE("INVOICING"),REQUESTOR("REQUESTOR"),RESPONSOR("Responser"),SIMULATOR("SIMULATOR"),PUSH_NOTIFICATION("MESSAGING"),
+    GENERATE_STATEMENT("STATEMENT"),MESSAGE_MERGE("MERGE_MESSAGE"),AUTO_EXIPIRY("AUTO_EXPIRY"), Middleware("MIDDLEWARE"),
+    EVENT_ACTION_PROCESSOR("EVENT_ACTIONS"),REPORT_EMAIL("REPORTER"),REPORT_STATMENT("PDF");
 
     private final String name;
 

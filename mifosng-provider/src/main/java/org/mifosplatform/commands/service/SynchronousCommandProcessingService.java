@@ -553,6 +553,8 @@ public class SynchronousCommandProcessingService implements
 				handler = applicationContext.getBean("orderExtensionCommandHandler",NewCommandSourceHandler.class);
 			}else if (wrapper.isOrderTerminate()) {
 				handler = applicationContext.getBean("orderTerminationCommandHandler",NewCommandSourceHandler.class);
+			}else if (wrapper.isOrderSuspend()) {
+				handler = applicationContext.getBean("orderSuspendCommandHandler",NewCommandSourceHandler.class);
 			}
 		} else if (wrapper.isOrderScheduling()) {
 			if (wrapper.isCreate()) {
@@ -981,6 +983,9 @@ public class SynchronousCommandProcessingService implements
 				         handler = applicationContext.getBean("createIpPoolManagementCommandHandler",NewCommandSourceHandler.class);
 				     }else if(wrapper.isUpdate()) {
 				         handler = applicationContext.getBean("updateIpPoolManagementCommandHandler",NewCommandSourceHandler.class);
+				   
+				     }else if(wrapper.isUpdateIpStatus()) {
+				         handler = applicationContext.getBean("updateIpAddressStatusCommandHandler",NewCommandSourceHandler.class);
 				   
 				     }else {
 				           throw new UnsupportedCommandException(wrapper.commandName());

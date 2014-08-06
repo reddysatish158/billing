@@ -1,92 +1,4 @@
-/**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
- */
-/*
-package org.mifosplatform.billing.message.service;
 
-import java.util.List;
-
-import org.apache.commons.mail.DefaultAuthenticator;
-import org.apache.commons.mail.Email;
-import org.apache.commons.mail.EmailException;
-import org.apache.commons.mail.SimpleEmail;
-import org.mifosplatform.billing.message.data.BillingMessageDataForProcessing;
-import org.mifosplatform.billing.message.domain.BillingMessage;
-import org.mifosplatform.billing.message.domain.MessageDataRepository;
-import org.mifosplatform.infrastructure.core.domain.EmailDetail;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-@Service
-public class MessageGmailBackedPlatformEmailService implements MessagePlatformEmailService {
-
-private final BillingMesssageReadPlatformService billingMesssageReadPlatformService;
- private final MessageDataRepository messageDataRepository;
-
- @Autowired
-    public MessageGmailBackedPlatformEmailService(BillingMesssageReadPlatformService billingMesssageReadPlatformService,
-    		MessageDataRepository messageDataRepository){
-	
-	 this.billingMesssageReadPlatformService=billingMesssageReadPlatformService;
-	 this.messageDataRepository=messageDataRepository;
-	 
- }
-
- @Override
- public void sendToUserEmail() {
-     Email email = new SimpleEmail();
-
-     String authuserName = "info@hugotechnologies.com";
-     //String authusername="hugotechnologies";
-
-     String authuser = "ashokcse556@gmail.com";
-     String authpwd = "9989720715";
-
-     // Very Important, Don't use email.setAuthentication()
-     email.setAuthenticator(new DefaultAuthenticator(authuser, authpwd));
-     email.setDebug(true); // true if you want to debug
-     email.setHostName("smtp.gmail.com");
-     try {
-         email.getMailSession().getProperties().put("mail.smtp.starttls.enable", "true");
-         email.setFrom(authuserName, authuser);
-         List<BillingMessageDataForProcessing> billingMessageDataForProcessings=this.billingMesssageReadPlatformService.retrieveMessageDataForProcessing();
-   	    for(BillingMessageDataForProcessing emailDetail : billingMessageDataForProcessings){
-          
-         StringBuilder subjectBuilder = new StringBuilder().append(" ").append(emailDetail.getSubject()).append("  ");
-
-         email.setSubject(subjectBuilder.toString());
-  
-        String sendToEmail = emailDetail.getMessageTo();
-
-         StringBuilder messageBuilder = new StringBuilder().append(emailDetail.getHeader()).append(".").append(emailDetail.getBody()).append(",").append(emailDetail.getFooter());
-
-         email.setMsg(messageBuilder.toString());
-
-         email.addTo(sendToEmail, emailDetail.getMessageFrom());
-         email.setSmtpPort(587);
-         email.send();
-         BillingMessage billingMessage=this.messageDataRepository.findOne(emailDetail.getId());
-         if(billingMessage.getStatus().contentEquals("N"))
-         {
-         	billingMessage.updateStatus();
-         }
-         this.messageDataRepository.save(billingMessage);
-         
-         
-        }
-   	 } catch (EmailException e) {
-         throw new MessagePlatformEmailSendException(e);
-     }
- }
-}*/
-
-/**
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
- */
 package org.mifosplatform.organisation.message.service;
 
 import java.io.BufferedReader;
@@ -141,6 +53,7 @@ public class MessageGmailBackedPlatformEmailService implements MessagePlatformEm
 	private String authpwd;
 	private String hostName;
 	private int portNumber;
+	private String port;
 	private GlobalConfigurationProperty configuration;
 	
 	@Autowired
@@ -151,46 +64,44 @@ public class MessageGmailBackedPlatformEmailService implements MessagePlatformEm
 		SmtpDataProcessing();
 	}
 	
-	public void SmtpDataProcessing(){
-		
-		configuration=repository.findOneByName("SMTP");
-		
-		if(configuration != null){
+	public void SmtpDataProcessing() {
+		try {
 			
-			 String value= configuration.getValue();
-		      
-		        try {
-					JSONObject object =new JSONObject(value);
-					authuser=(String) object.get("mailId");
-					encodedPassword=(String) object.get("password");
-					authpwd=new String(Base64.decodeBase64(encodedPassword));
-					hostName=(String) object.get("hostName");
-					String port=object.getString("port");
-					if(port.isEmpty()){
-						portNumber=Integer.parseInt("25");
-					}else{
-						portNumber=Integer.parseInt(port);
+			GlobalConfigurationProperty configuration1 = repository.findOneByName("SMTP");
+			String value = configuration1.getValue();
+			JSONObject object = new JSONObject(value);
+			
+			if (configuration1 != null && configuration != null) {
+				if (authuser.equalsIgnoreCase(object.getString("mailId")) && encodedPassword.equals(object.getString("password"))) {
+					if (hostName.equals(object.getString("hostName")) && port.equalsIgnoreCase(object.getString("port"))) {
+						return;
 					}
-				} catch (JSONException e) {
-					e.printStackTrace();
 				}
+			}
+			
+			if (configuration1 != null) {
+				configuration = configuration1;
+				authuser = (String) object.get("mailId");
+				encodedPassword = (String) object.get("password");
+				authpwd = new String(Base64.decodeBase64(encodedPassword));
+				hostName = (String) object.get("hostName");
+			    port = object.getString("port");
+				if (port.isEmpty()) {
+					portNumber = Integer.parseInt("25");
+				} else {
+					portNumber = Integer.parseInt(port);
+				}
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
 		}
-       
-	}
-	
-	public String rechecking(){
-		configuration = null;
-		SmtpDataProcessing();
-		if(configuration != null){
-			return "success";
-		}else{
-			return "failure";
-		}
+
 	}
 
 	@Override
 	public String sendToUserEmail(BillingMessageDataForProcessing emailDetail) {
-				
+		
+		SmtpDataProcessing();
 		if(configuration != null){
 			
 			 //1) get the session object      
@@ -204,67 +115,58 @@ public class MessageGmailBackedPlatformEmailService implements MessagePlatformEm
 		             return new PasswordAuthentication(authuser,authpwd);    }   });       
 
 		     //2) compose message      
-		     try{
-		    	 Date date=new Date();
-				 String dateTime=date.getHours()+""+date.getMinutes();
-			     String fileName="Statement_"+new LocalDate().toString().replace("-","")+"_"+dateTime+".pdf";
-		    	 
-		    	 MimeMessage message = new MimeMessage(session);    
-		         message.setFrom(new InternetAddress(authuser));     
-		         message.addRecipient(Message.RecipientType.TO,new InternetAddress(emailDetail.getMessageTo()));    
-		         message.setSubject(emailDetail.getSubject());     
-		         
-		         StringBuilder messageBuilder = new StringBuilder()
-			     .append(emailDetail.getHeader()+'\n')   
-			     .append(emailDetail.getBody()+'\n')
-			     .append(emailDetail.getFooter());
+			try {
+				MimeMessage message = new MimeMessage(session);
+				message.setFrom(new InternetAddress(authuser));
+				message.addRecipient(Message.RecipientType.TO,new InternetAddress(emailDetail.getMessageTo()));
+				message.setSubject(emailDetail.getSubject());
 
-		         //3) create MimeBodyPart object and set your message text        
-		         BodyPart messageBodyPart1 = new MimeBodyPart();     
-		         messageBodyPart1.setText(messageBuilder.toString());      
-		       
+				StringBuilder messageBuilder = new StringBuilder()
+						.append(emailDetail.getHeader() + '\n')
+						.append(emailDetail.getBody() + '\n')
+						.append(emailDetail.getFooter());
 
-		                    
+				// 3) create MimeBodyPart object and set your message text
+				BodyPart messageBodyPart = new MimeBodyPart();
+				messageBodyPart.setText(messageBuilder.toString());
 
-		         //5) create Multipart object and add MimeBodyPart objects to this object        
-		         Multipart multipart = new MimeMultipart();    
-		         multipart.addBodyPart(messageBodyPart1);  
-		         if(!emailDetail.getAttachment().isEmpty()){
-		        	//4) create new MimeBodyPart object and set DataHandler object to this object        
-			         MimeBodyPart messageBodyPart2 = new MimeBodyPart();      
-			         String filename = emailDetail.getAttachment();//change accordingly     
-			         DataSource source = new FileDataSource(filename);    
-			         messageBodyPart2.setDataHandler(new DataHandler(source));    
-			         messageBodyPart2.setFileName(fileName);  
-		        	 multipart.addBodyPart(messageBodyPart2);    
-		         }
-		           
-		         //6) set the multiplart object to the message object    
-		         message.setContent(multipart );        
+				// 5) create Multipart object and add MimeBodyPart objects to this object
+				Multipart multipart = new MimeMultipart();
+				multipart.addBodyPart(messageBodyPart);
+				if (!emailDetail.getAttachment().isEmpty()) {
+					Date date = new Date();
+					String dateTime = date.getHours() + "" + date.getMinutes();
+					String fileName = "Statement_" + new LocalDate().toString().replace("-", "") + "_" + dateTime + ".pdf";
+					
+					// 4) create new MimeBodyPart object and set DataHandler object to this object
+					MimeBodyPart mimeBodyPart = new MimeBodyPart();
+					String filename = emailDetail.getAttachment();// change accordingly
+					DataSource source = new FileDataSource(filename);
+					mimeBodyPart.setDataHandler(new DataHandler(source));
+					mimeBodyPart.setFileName(fileName);
+					multipart.addBodyPart(mimeBodyPart);
+				}
 
-		         //7) send message    
-		         Transport.send(message);      
-		         System.out.println("message sent....");   
+				// 6) set the multiplart object to the message object
+				message.setContent(multipart);
+
+				// 7) send message
+				Transport.send(message);
+				System.out.println("message sent....");
 				BillingMessage billingMessage = this.messageDataRepository.findOne(emailDetail.getId());
 				if (billingMessage.getStatus().contentEquals("N")) {
 					billingMessage.updateStatus();
 				}
 				this.messageDataRepository.save(billingMessage);
 				return "success";
-				
-		     }catch(Exception e){
+
+			}catch(Exception e){
 		    	 handleCodeDataIntegrityIssues(null, e);
 			     return e.getMessage();
 		     }
 		        
-		}else{
-			String result = rechecking();
-			if(result.equalsIgnoreCase("failure")){
-				throw new GlobalConfigurationPropertyNotFoundException("SMTP GlobalConfiguration Property Not Found"); 
-			}else{
-				return sendToUserEmail(emailDetail);
-			}
-			
+		}else{	
+			throw new GlobalConfigurationPropertyNotFoundException("SMTP GlobalConfiguration Property Not Found"); 		
 		}
 		
             
@@ -332,6 +234,7 @@ public class MessageGmailBackedPlatformEmailService implements MessagePlatformEm
 	@Override
 	public String createEmail(String pdfFileName, String emailId) {
 		
+		SmtpDataProcessing();
 		if(configuration != null){
 			
 			Date date=new Date();
@@ -373,15 +276,9 @@ public class MessageGmailBackedPlatformEmailService implements MessagePlatformEm
 			    return "Success";
 		    } catch (MessagingException e) {
 			      throw new RuntimeException(e);
-			}
-			
-		}else{
-			String result = rechecking();
-			if(result.equalsIgnoreCase("failure")){
-				throw new GlobalConfigurationPropertyNotFoundException("SMTP GlobalConfiguration Property Not Found"); 
-			}else{
-				return createEmail(pdfFileName,emailId);
-			}
+			}		
+		}else{			
+			throw new GlobalConfigurationPropertyNotFoundException("SMTP GlobalConfiguration Property Not Found"); 		
 		}
 		 
 		    
@@ -389,6 +286,8 @@ public class MessageGmailBackedPlatformEmailService implements MessagePlatformEm
 
 	@Override
 	public String sendGeneralMessage(String emailId, String body ,String subject) {
+		
+		SmtpDataProcessing();
 		
 		if(configuration != null){
 		
@@ -414,13 +313,8 @@ public class MessageGmailBackedPlatformEmailService implements MessagePlatformEm
 				return e.getMessage();
 			}
 			
-		}else{
-			String result = rechecking();
-			if(result.equalsIgnoreCase("failure")){
-				throw new GlobalConfigurationPropertyNotFoundException("SMTP GlobalConfiguration Property Not Found"); 
-			}else{
-				return sendGeneralMessage(emailId,body,subject);
-			}
+		}else{			
+			throw new GlobalConfigurationPropertyNotFoundException("SMTP GlobalConfiguration Property Not Found"); 			
 		}
 		       
 	}

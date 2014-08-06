@@ -90,10 +90,11 @@ public class AppUser extends AbstractPersistable<Long> implements PlatformUser {
         final String username = command.stringValueOfParameterNamed("username");
         String password = command.stringValueOfParameterNamed("password");
         final Boolean sendPasswordToEmail = command.booleanObjectValueOfParameterNamed("sendPasswordToEmail");
-        
         if (sendPasswordToEmail.booleanValue()) {
             password = new RandomPasswordGenerator(13).generate();
         }
+
+
 
         boolean userEnabled = true;
         boolean userAccountNonExpired = true;

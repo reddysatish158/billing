@@ -172,6 +172,17 @@ public class IpPoolManagementApiResource {
         return this.toApiJsonSerializer.serialize(result);
     } 
 	
+	@PUT
+	@Path("updatestatus")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String updateIpStatus(final String apiRequestBodyAsJson) {
+		
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateIpStatus().withJson(apiRequestBodyAsJson).build();
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        return this.toApiJsonSerializer.serialize(result);
+    } 
+	
 	@GET
 	@Path("id/{poolId}")
 	@Consumes({ MediaType.APPLICATION_JSON })

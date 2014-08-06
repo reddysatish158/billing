@@ -2381,6 +2381,21 @@ public CommandWrapperBuilder editGrn(Long id) {
 	return this;
 }
 
+public CommandWrapperBuilder updateIpStatus() {
+	this.actionName = "UPDATEIPSTATUS";
+	this.entityName = "IPPOOLMANAGEMENT";
+	this.href = "itemdetails/editgrn";
+	return this;
+	}
+
+public CommandWrapperBuilder suspendOrder(Long orderId) {
+	
+	this.actionName = "SUSPEND";
+	this.entityName = "ORDER";
+	this.entityId=orderId;
+	this.href = "suspend/"+orderId;
+	return this;
+}
 public CommandWrapperBuilder registerSelfCareRegister() {
 	this.actionName = "REGISTER";
 	this.entityName = "SELFCARE";

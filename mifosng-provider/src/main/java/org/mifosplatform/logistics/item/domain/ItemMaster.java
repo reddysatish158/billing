@@ -60,7 +60,7 @@ public class ItemMaster extends AbstractPersistable<Long>{
              this.warranty=warranty;
              this.unitPrice=unitPrice;
              this.reorderLevel=reorderLevel; 
-            
+
 	}
 
 	public String getItemCode() {

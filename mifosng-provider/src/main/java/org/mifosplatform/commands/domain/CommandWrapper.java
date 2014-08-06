@@ -1131,6 +1131,13 @@ public class CommandWrapper {
 			return this.actionName.equalsIgnoreCase("DELETE") && this.entityName.equalsIgnoreCase("EVENTVALIDATION");
 		}
 
+		public boolean isUpdateIpStatus() {
+			return this.actionName.equalsIgnoreCase("UPDATEIPSTATUS") && this.entityName.equalsIgnoreCase("IPPOOLMANAGEMENT");
+		}
+
+		public boolean isOrderSuspend() {
+			return this.actionName.equalsIgnoreCase("SUSPEND") && this.entityName.equalsIgnoreCase("ORDER");
+		}
 		public boolean isSelfCareRegister() {
 			return this.actionName.equalsIgnoreCase("REGISTER") && this.entityName.equalsIgnoreCase("SELFCARE");
 		}
