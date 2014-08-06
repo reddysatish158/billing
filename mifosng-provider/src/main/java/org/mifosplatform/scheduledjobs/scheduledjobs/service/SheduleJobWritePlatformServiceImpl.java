@@ -1336,36 +1336,35 @@ this.transactionHistoryWritePlatformService.saveTransactionHistory(entitlementsD
 @Override
 @CronTarget(jobName = JobName.EVENT_ACTION_PROCESSOR)
 public void eventActionProcessor() {
-	System.out.println("Processing Event Actions.....");
-	
 	try {
-	
-	MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();	
-	final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
-	LocalTime date=new LocalTime(zone);
-	String dateTime=date.getHourOfDay()+"_"+date.getMinuteOfHour()+"_"+date.getSecondOfMinute();
+		System.out.println("Processing Event Actions.....");
+		MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();	
+		final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
+		LocalTime date=new LocalTime(zone);
+		String dateTime=date.getHourOfDay()+"_"+date.getMinuteOfHour()+"_"+date.getSecondOfMinute();
 
-//Retrieve Event Actions
-	String path=FileUtils.generateLogFileDirectory()+ JobName.EVENT_ACTION_PROCESSOR.toString() + File.separator +"Activationprocess_"+new LocalDate().toString().replace("-","")+"_"+dateTime+".log";
-	File fileHandler = new File(path.trim());
-	fileHandler.createNewFile();
-	FileWriter fw = new FileWriter(fileHandler);
-	FileUtils.BILLING_JOB_PATH=fileHandler.getAbsolutePath();
-	List<EventActionData> actionDatas=this.actionDetailsReadPlatformService.retrieveAllActionsForProccessing();
-		for(EventActionData eventActionData:actionDatas){
-			fw.append("Process Response id="+eventActionData.getId()+" ,orderId="+eventActionData.getOrderId()+" ,Provisiong System="+eventActionData.getActionName()+ " \r\n");
-			System.out.println(eventActionData.getId());
-			this.actiondetailsWritePlatformService.ProcessEventActions(eventActionData);
-	}
-		System.out.println("Event Actions are Processed....");
-		fw.append("Event Actions are Completed.... \r\n");
-		fw.flush();
-		fw.close();
-	} catch (DataIntegrityViolationException e) {
-		System.out.println(e.getMessage());
-	}catch (Exception exception) {
-		System.out.println(exception.getMessage());
-	}
+		//Retrieve Event Actions
+		String path=FileUtils.generateLogFileDirectory()+ JobName.EVENT_ACTION_PROCESSOR.toString() + File.separator +"Activationprocess_"+new LocalDate().toString().replace("-","")+"_"+dateTime+".log";
+		File fileHandler = new File(path.trim());
+		fileHandler.createNewFile();
+		FileWriter fw = new FileWriter(fileHandler);
+		FileUtils.BILLING_JOB_PATH=fileHandler.getAbsolutePath();
+		List<EventActionData> actionDatas=this.actionDetailsReadPlatformService.retrieveAllActionsForProccessing();
+			
+			for(EventActionData eventActionData:actionDatas){
+				fw.append("Process Response id="+eventActionData.getId()+" ,orderId="+eventActionData.getOrderId()+" ,Provisiong System="+eventActionData.getActionName()+ " \r\n");
+				System.out.println(eventActionData.getId());
+				this.actiondetailsWritePlatformService.ProcessEventActions(eventActionData);
+			}
+			System.out.println("Event Actions are Processed....");
+			fw.append("Event Actions are Completed.... \r\n");
+			fw.flush();
+			fw.close();
+		} catch (DataIntegrityViolationException e) {
+			System.out.println(e.getMessage());
+		}catch (Exception exception) {
+			System.out.println(exception.getMessage());
+		}
 	}
 
 @Transactional

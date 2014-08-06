@@ -132,7 +132,7 @@ public class SchedularWritePlatformServiceJpaRepositoryImpl implements Schedular
     public boolean processJobDetailForExecution(String jobKey, String triggerType) {    
     	
     	boolean isStopExecution = false;
-    final ScheduledJobDetail scheduledJobDetail = this.scheduledJobDetailsRepository.findByJobKeyWithLock(jobKey);
+    final ScheduledJobDetail scheduledJobDetail = this.scheduledJobDetailsRepository.findByJobKey(jobKey);
     if (scheduledJobDetail.isCurrentlyRunning()
             || (triggerType == SchedulerServiceConstants.TRIGGER_TYPE_CRON && (scheduledJobDetail.getNextRunTime().after(new Date())))) {
         isStopExecution = true;
