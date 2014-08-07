@@ -42,20 +42,22 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class PlansApiResource {
 
-	private  final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "planCode", "plan_description", "startDate",
+	private  final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "planCode", "plan_description", "startDate","isHwReq",
             "endDate", "status", "service_code", "service_description","Period", "charge_code", "charge_description","servicedata","contractPeriod","provisionSystem",
             "service_type", "charge_type", "allowedtypes","selectedservice","bill_rule","billiingcycle","servicedata","services","statusname","planstatus","volumeTypes"));
-	 private final String resourceNameForPermissions = "PLAN";
-	  private final PlatformSecurityContext context;
+	 
+		private final String resourceNameForPermissions = "PLAN";
+		private final PlatformSecurityContext context;
 	    private final DefaultToApiJsonSerializer<PlanData> toApiJsonSerializer;
 	    private final ApiRequestParameterHelper apiRequestParameterHelper;
 	    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 	    private final PlanReadPlatformService planReadPlatformService;
 	    
 	    @Autowired
-	    public PlansApiResource(final PlatformSecurityContext context, 
-	   final DefaultToApiJsonSerializer<PlanData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper,
-	   final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,final PlanReadPlatformService planReadPlatformService) {
+	    public PlansApiResource(final PlatformSecurityContext context,final DefaultToApiJsonSerializer<PlanData> toApiJsonSerializer,
+	    		final ApiRequestParameterHelper apiRequestParameterHelper,final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
+	    		final PlanReadPlatformService planReadPlatformService) {
+	    	
 		        this.context = context;
 		        this.toApiJsonSerializer = toApiJsonSerializer;
 		        this.apiRequestParameterHelper = apiRequestParameterHelper;

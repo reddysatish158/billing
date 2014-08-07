@@ -86,6 +86,7 @@ public class ActionDetailsReadPlatformServiceImpl implements ActionDetailsReadPl
 			  Long orderId=null;
 			  String planId=null;
 			  String emailId=null;
+			  if(result != null){
 			  	if(result.equalsIgnoreCase("true") && resource != null){
 			  		isCheck=true;
 			  		String[] resultdatas=resource.split(" ");
@@ -98,6 +99,7 @@ public class ActionDetailsReadPlatformServiceImpl implements ActionDetailsReadPl
 				  actionName=map.get("action");
 				  orderresource=map.get("orderid");
 				  planId=map.get("planid");
+			  }
 			  }
 			  	if(orderresource !=null){
 			  		orderId=Long.parseLong(orderresource);

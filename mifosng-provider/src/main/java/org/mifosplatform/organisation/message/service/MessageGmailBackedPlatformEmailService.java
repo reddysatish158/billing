@@ -133,7 +133,7 @@ public class MessageGmailBackedPlatformEmailService implements MessagePlatformEm
 				// 5) create Multipart object and add MimeBodyPart objects to this object
 				Multipart multipart = new MimeMultipart();
 				multipart.addBodyPart(messageBodyPart);
-				if (!emailDetail.getAttachment().isEmpty()) {
+				if (emailDetail.getAttachment() != null) {
 					Date date = new Date();
 					String dateTime = date.getHours() + "" + date.getMinutes();
 					String fileName = "Statement_" + new LocalDate().toString().replace("-", "") + "_" + dateTime + ".pdf";

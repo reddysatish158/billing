@@ -64,31 +64,30 @@ public class PrepareRequestReadplatformServiceImpl  implements PrepareRequestRea
 	
 	@Override
 	public List<PrepareRequestData> retrieveDataForProcessing() {
-		try {
 			
-			  
-	        
-	        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSourcePerTenantService.retrieveDataSource());
-			final ClientOrderMapper mapper = new ClientOrderMapper();
-
-			final String sql = "select " + mapper.clientOrderLookupSchema();
-
-			return jdbcTemplate.query(sql, mapper, new Object[] { });
+		try {
+				JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSourcePerTenantService.retrieveDataSource());
+				final ProvisioningMapper mapper = new ProvisioningMapper();
+				final String sql = "select " + mapper.provisioningLookupSchema();
+				return jdbcTemplate.query(sql, mapper, new Object[] { });
 			} catch (EmptyResultDataAccessException e) {
-			return null;
+				return null;
+			}
 			}
 
-			}
+	private static final class ProvisioningMapper implements RowMapper<PrepareRequestData> {
 
-			private static final class ClientOrderMapper implements RowMapper<PrepareRequestData> {
-
-			public String clientOrderLookupSchema() {
-			return  " pr.id AS id,pr.client_id AS clientId,pr.order_id AS orderId,pr.provisioning_sys AS provisioningSystem,c.firstname AS userName," +
-					" p.is_hw_req AS hwRequired,pw.plan_code AS planName,pr.request_type AS requestType FROM b_prepare_request pr,m_client c,b_hw_plan_mapping pw," +
-					" b_orders o,b_association asoc,b_plan_master p  WHERE pr.client_id = c.id  AND o.plan_id = p.id  AND pr.provisioning_sys !='packetspan' " +
-					" AND p.plan_code = pw.plan_code  AND pr.order_id = o.id" +
-					" AND o.id=asoc.order_id  AND (pr.is_provisioning = 'N' OR pr.status = 'PENDING') group by pr.order_id desc ";
-
+			public String provisioningLookupSchema() {
+				/*return  " pr.id AS id,pr.client_id AS clientId,pr.order_id AS orderId,pr.provisioning_sys AS provisioningSystem,c.firstname AS userName," +
+						" p.is_hw_req AS hwRequired,pw.plan_code AS planName,pr.request_type AS requestType FROM b_prepare_request pr,m_client c,b_hw_plan_mapping pw," +
+						" b_orders o,b_association asoc,b_plan_master p  WHERE pr.client_id = c.id  AND o.plan_id = p.id  AND pr.provisioning_sys !='packetspan' " +
+						" AND p.plan_code = pw.plan_code  AND pr.order_id = o.id" +
+						" AND o.id=asoc.order_id  AND (pr.is_provisioning = 'N' OR pr.status = 'PENDING') group by pr.order_id desc ";*/
+				
+				return "  pr.id AS id,pr.client_id AS clientId,pr.order_id AS orderId,pr.provisioning_sys AS provisioningSystem,c.firstname AS userName," +
+						" p.is_hw_req AS hwRequired,p.plan_code AS planName,pr.request_type AS requestType FROM b_prepare_request pr,m_client c,b_orders o," +
+						" b_plan_master p WHERE pr.client_id = c.id AND o.plan_id = p.id AND pr.provisioning_sys != 'packetspan' AND pr.order_id = o.id" +
+						" AND (pr.is_provisioning = 'N' OR pr.status = 'PENDING') GROUP BY pr.order_id DESC";
 			}
 
 			@Override
@@ -99,14 +98,13 @@ public class PrepareRequestReadplatformServiceImpl  implements PrepareRequestRea
 			final Long orderId = rs.getLong("orderId");
 			final String requestType = rs.getString("requestType");
 		    final String planName=rs.getString("planName");	
-			
 			final String userName=rs.getString("userName");
 			final String ishwReq=rs.getString("hwRequired");
 			final String provisioningSys=rs.getString("provisioningSystem");
 			
 			return new PrepareRequestData(id, clientId,orderId, requestType,null,userName,provisioningSys,planName,ishwReq);
-			}
-			}
+				}
+			}	
 			
 			@Override
 			public List<Long> retrieveRequestClientOrderDetails(Long clientId) {
@@ -147,94 +145,81 @@ public class PrepareRequestReadplatformServiceImpl  implements PrepareRequestRea
 				
 				try{
 
-					String requestType=null,sentMessage=null;			        
-					  Order order=this.orderRepository.findOne(requestData.getOrderId());
-					 AllocationDetailsData detailsData=this.allocationReadPlatformService.getTheHardwareItemDetails(requestData.getOrderId(),configProp);
-					 requestType=requestData.getRequestType();
-					 
-					  PrepareRequest prepareRequest=this.prepareRequsetRepository.findOne(requestData.getRequestId());
-					  
-					 if(requestData.getIshardwareReq().equalsIgnoreCase("Y") && detailsData == null){
-						 
-						    
-						      String status=OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.PENDING).getValue().toString();
-         	                  prepareRequest.setStatus(status);
-	                          this.prepareRequsetRepository.save(prepareRequest);
-	                         
-	                         //Update Order Status
-	                         order.setStatus(OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.PENDING).getId());
-	                         this.orderRepository.saveAndFlush(order);
-	                       
-	                     /*  this.transactionHistoryWritePlatformService.saveTransactionHistory(order.getClientId(),"Provisioning",new Date(),"Order No:"+order.getOrderNo(),
-	                        	"Request Type :"+prepareRequest.getRequestType(),	"Request Id :"+prepareRequest.getId(),"Status:Pending","Reason :Hardware is not allocated",ft.format(new Date())); 
-						 */
-					 }else {
+						String requestType=null,sentMessage=null;			        
+						Order order=this.orderRepository.findOne(requestData.getOrderId());
+						AllocationDetailsData detailsData=this.allocationReadPlatformService.getTheHardwareItemDetails(requestData.getOrderId(),configProp);
+						requestType=requestData.getRequestType();
+						PrepareRequest prepareRequest=this.prepareRequsetRepository.findOne(requestData.getRequestId());
 
-						 ProcessRequest processRequest=new ProcessRequest(order.getClientId(), order.getId(), requestData.getProvisioningSystem(),
-								 'N',requestData.getUserName(),requestType,requestData.getRequestId());
-					  
-					          List<OrderLine> orderLineData=order.getServices();
-					          
-					       for(OrderLine orderLine:orderLineData){
-						    String HardWareId=null;
-						  if(detailsData!=null){
-							  HardWareId=detailsData.getSerialNo();
-						  }
-						  
-						  List<ProvisionServiceDetails> provisionServiceDetails=this.provisionServiceDetailsRepository.findOneByServiceId(orderLine.getServiceId());
-
-						  ServiceMaster service=this.serviceMasterRepository.findOne(orderLine.getServiceId());
+						if(requestData.getIshardwareReq().equalsIgnoreCase("Y") && detailsData == null){
+							String status=OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.PENDING).getValue().toString();
+							prepareRequest.setStatus(status);
+							this.prepareRequsetRepository.save(prepareRequest);
+								
+							//Update Order Status
+							order.setStatus(OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.PENDING).getId());
+							this.orderRepository.saveAndFlush(order);
 						
-						  if(!provisionServiceDetails.isEmpty()){
-							  /*Ashok adding
-							   * 
-							   */
-							  sentMessage = provisionServiceDetails.get(0).getServiceIdentification();
-							  
-                              if(requestData.getRequestType().equalsIgnoreCase(UserActionStatusTypeEnum.DEVICE_SWAP.toString())){
-                            	  
-                            	/*   requestType=UserActionStatusTypeEnum.ACTIVATION.toString();*/
-                            		 AllocationDetailsData allocationDetailsData=this.allocationReadPlatformService.getDisconnectedHardwareItemDetails(requestData.getOrderId(),requestData.getClientId(),configProp);
-                            		 JSONObject object = new JSONObject();
-                            		 object.put("clientId", order.getClientId());
-                            		 object.put("service", provisionServiceDetails.get(0).getServiceIdentification());
-                            		 object.put("OldHWId", allocationDetailsData.getSerialNo());
-                            		 object.put("NewHWId", HardWareId);
-                            		 
-                            		 sentMessage = object.toString();
-                            		 
-                            		/* ProcessRequestDetails processRequestDetails=new ProcessRequestDetails(orderLine.getId(),orderLine.getServiceId(),provisionServiceDetails.get(0).getServiceIdentification(),"Recieved",
-                            				 allocationDetailsData.getSerialNo(),order.getStartDate(),order.getEndDate(),null,null,'N',UserActionStatusTypeEnum.DISCONNECTION.toString());
-                            		 processRequest.add(processRequestDetails);*/
-                            		 
-                              }
-                           
-						  ProcessRequestDetails processRequestDetails=new ProcessRequestDetails(orderLine.getId(),orderLine.getServiceId(),sentMessage,"Recieved",
-								  HardWareId,order.getStartDate(),order.getEndDate(),null,null,'N',requestType,service.getServiceType());
-						  processRequest.add(processRequestDetails);
-						  
-						/*  this.transactionHistoryWritePlatformService.saveTransactionHistory(order.getClientId(),"Provisioning",new Date(),"Order No:"+order.getOrderNo(),
-								  "Request Type :"+prepareRequest.getRequestType(), "Request Id :"+prepareRequest.getId(),"Status:Sent For activation",ft.format(new Date())); */
-						  }
-					  }
-	                       this.processRequestRepository.save(processRequest);				
-	                       //PrepareRequest prepareRequest=this.prepareRequsetRepository.findOne(requestData.getRequestId());
-                           prepareRequest.setIsProvisioning('Y');
-                           String status=OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.ACTIVE).getValue().toString();
-      	                  prepareRequest.setStatus(status);
-                           this.prepareRequsetRepository.save(prepareRequest);
-                         
-                           
-				  }
-					 if(requestData.getProvisioningSystem().equalsIgnoreCase("None")){
-						 order.setStatus(new Long(1));
-						 this.orderRepository.save(order);
-					 }
-				}catch(Exception exception){
+						}else {
+							ProcessRequest processRequest=new ProcessRequest(order.getClientId(), order.getId(), requestData.getProvisioningSystem(),
+									'N',requestData.getUserName(),requestType,requestData.getRequestId());
+								List<OrderLine> orderLineData=order.getServices();
+								for(OrderLine orderLine:orderLineData){
+									String HardWareId=null;
+									
+									if(detailsData!=null){
+										HardWareId=detailsData.getSerialNo();
+									}
+								List<ProvisionServiceDetails> provisionServiceDetails=this.provisionServiceDetailsRepository.findOneByServiceId(orderLine.getServiceId());
+								ServiceMaster service=this.serviceMasterRepository.findOne(orderLine.getServiceId());
+								
+								if(!provisionServiceDetails.isEmpty()){
+									sentMessage = provisionServiceDetails.get(0).getServiceIdentification();
+									
+									if(requestData.getRequestType().equalsIgnoreCase(UserActionStatusTypeEnum.DEVICE_SWAP.toString())){
+										/*   requestType=UserActionStatusTypeEnum.ACTIVATION.toString();*/
+										String oldHardwareId=null;
+										AllocationDetailsData allocationDetailsData=this.allocationReadPlatformService.
+												getDisconnectedHardwareItemDetails(requestData.getOrderId(),requestData.getClientId(),configProp);
+											
+											if(requestData.getIshardwareReq().equalsIgnoreCase("Y") && allocationDetailsData != null){
+												oldHardwareId=allocationDetailsData.getSerialNo();
+											}
+										JSONObject object = new JSONObject();
+										object.put("clientId", order.getClientId());
+										object.put("service", provisionServiceDetails.get(0).getServiceIdentification());
+										object.put("OldHWId", oldHardwareId);
+										object.put("NewHWId", HardWareId);
+										sentMessage = object.toString();
+										
+										/* ProcessRequestDetails processRequestDetails=new ProcessRequestDetails(orderLine.getId(),orderLine.getServiceId(),provisionServiceDetails.get(0).getServiceIdentification(),"Recieved",
+                            				 	allocationDetailsData.getSerialNo(),order.getStartDate(),order.getEndDate(),null,null,'N',UserActionStatusTypeEnum.DISCONNECTION.toString());
+                            		 	processRequest.add(processRequestDetails);*/
+									}
+									ProcessRequestDetails processRequestDetails=new ProcessRequestDetails(orderLine.getId(),orderLine.getServiceId(),sentMessage,"Recieved",
+											HardWareId,order.getStartDate(),order.getEndDate(),null,null,'N',requestType,service.getServiceType());
+									processRequest.add(processRequestDetails);
+									
+									/*  this.transactionHistoryWritePlatformService.saveTransactionHistory(order.getClientId(),"Provisioning",new Date(),"Order No:"+order.getOrderNo(),
+								  		"Request Type :"+prepareRequest.getRequestType(), "Request Id :"+prepareRequest.getId(),"Status:Sent For activation",ft.format(new Date())); */
+								}
+								}
+								
+								this.processRequestRepository.save(processRequest);				
+								//	PrepareRequest prepareRequest=this.prepareRequsetRepository.findOne(requestData.getRequestId());
+								prepareRequest.setIsProvisioning('Y');
+								String status=OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.ACTIVE).getValue().toString();
+								prepareRequest.setStatus(status);
+								this.prepareRequsetRepository.save(prepareRequest);
+									}
+									if(requestData.getProvisioningSystem().equalsIgnoreCase("None")){
+										order.setStatus(new Long(1));
+										this.orderRepository.save(order);
+									}
+					}catch(Exception exception){
 					exception.printStackTrace();
-				}
-	              
-				}
+					}
+			}
 
 			@Override
 			public List<Long> getPrepareRequestDetails(Long id) {

@@ -31,7 +31,7 @@ public final class PlanCommandFromApiJsonDeserializer {
      * The parameters supported for this command.
      */
     private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("planCode","planDescription","locale",
-    		"dateFormat","startDate","endDate","status","chargeCode","roles","billRule",
+    		"dateFormat","startDate","endDate","status","chargeCode","roles","billRule","isHwReq",
     		"provisioingSystem","services","duration","volume","isPrepaid","units","allowTopup"));
     private final FromJsonHelper fromApiJsonHelper;
 

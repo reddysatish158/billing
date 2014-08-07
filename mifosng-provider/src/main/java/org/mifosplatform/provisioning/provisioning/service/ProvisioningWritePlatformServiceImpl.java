@@ -212,7 +212,7 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 				final String iprange=command.stringValueOfParameterNamed("ipRange");
 				final Long subnet=command.longValueOfParameterNamed("subnet");
 				String[] ipAddressArray =null;
-				PrepareRequest prepareRequest=this.prepareRequsetRepository.getLatestRequestByOrderId(orderId);
+			//	PrepareRequest prepareRequest=this.prepareRequsetRepository.getLatestRequestByOrderId(orderId);
 				InventoryItemDetails inventoryItemDetails=this.inventoryItemDetailsRepository.getInventoryItemDetailBySerialNum(macId);
 					if(inventoryItemDetails == null){
 						throw new PairingNotExistException(orderId);
@@ -265,7 +265,7 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 				jsonObject.put(ProvisioningApiConstants.PROV_DATA_MACID,macId);
 				jsonObject.put(ProvisioningApiConstants.PROV_DATA_IPTYPE,ipType);
 				ProcessRequest processRequest=new ProcessRequest(clientId,orderId,ProvisioningApiConstants.PROV_PACKETSPAN, 'N',
-					null,UserActionStatusTypeEnum.ACTIVATION.toString(), prepareRequest.getId());
+					null,UserActionStatusTypeEnum.ACTIVATION.toString(), Long.valueOf(0));
 				Order order=this.orderRepository.findOne(orderId);
 				List<OrderLine> orderLines=order.getServices();
 				
@@ -279,8 +279,8 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 					}
 					this.processRequestRepository.saveAndFlush(processRequest);
 					//Update Prepare Request table
-					prepareRequest.updateProvisioning('Y');
-					this.prepareRequsetRepository.save(prepareRequest);
+					//prepareRequest.updateProvisioning('Y');
+					//this.prepareRequsetRepository.save(prepareRequest);
 					return new CommandProcessingResult(Long.valueOf(processRequest.getId()));
 		}catch(DataIntegrityViolationException dve){
 			handleCodeDataIntegrityIssues(command, dve);

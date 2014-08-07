@@ -30,6 +30,7 @@ public class PlanData {
 	private String provisionSystem;
 	private String isPrepaid;
 	private String allowTopup;
+	private String isHwReq;
 	private String volume;
 	private String units;
 	private String unitType;
@@ -56,6 +57,8 @@ public class PlanData {
 		this.units=datas.getUnits();
 		this.unitType=datas.getUnitType();
 		this.contractPeriod=datas.getPeriod();
+		this.isHwReq=datas.getIsHwReq();
+		
 		}
 		this.services = data;
         this.provisionSysData=provisionSysData;
@@ -74,7 +77,7 @@ public class PlanData {
 	
 	public PlanData(Long id, String planCode, LocalDate startDate,LocalDate endDate, Long bill_rule, String contractPeriod,
 			long status, String planDescription, long status1,String provisionSys,EnumOptionData enumstatus, String isPrepaid,
-			String allowTopup, String volume, String units, String unitType, List<ServiceData> services, Long contractId) {
+			String allowTopup, String volume, String units, String unitType, List<ServiceData> services, Long contractId, String isHwReq) {
 
 		this.id = id;
 		this.planCode = planCode;
@@ -96,11 +99,32 @@ public class PlanData {
 		this.volume=volume;
 		this.units=units;
 		this.unitType=unitType;
+		this.isHwReq=isHwReq;
 		this.services=services;
 		this.contractId=contractId;
 	}
 
 	
+
+	public List<String> getContractPeriods() {
+		return contractPeriods;
+	}
+
+
+	public String getIsHwReq() {
+		return isHwReq;
+	}
+
+
+	public Long getContractId() {
+		return contractId;
+	}
+
+
+	public List<PlanData> getData() {
+		return data;
+	}
+
 
 	public PlanData(List<PlanData> datas) {
 		this.data = datas;
