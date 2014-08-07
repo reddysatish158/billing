@@ -1332,7 +1332,6 @@ this.transactionHistoryWritePlatformService.saveTransactionHistory(entitlementsD
  	}
 	}
 
-@Transactional
 @Override
 @CronTarget(jobName = JobName.EVENT_ACTION_PROCESSOR)
 public void eventActionProcessor() {

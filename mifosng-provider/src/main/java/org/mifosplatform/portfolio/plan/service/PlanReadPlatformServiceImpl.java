@@ -168,7 +168,7 @@ public class PlanReadPlatformServiceImpl implements PlanReadPlatformService {
 			}
 			
 			return new PlanData(id, planCode, startDate, endDate,null,duration, plan, planDescription, plan, null, enumstatus,
-					null,null, null,null,null,services,contractId);
+					null,null, null,null,null,services,contractId,null);
 		}
 		
 	}
@@ -223,7 +223,7 @@ public class PlanReadPlatformServiceImpl implements PlanReadPlatformService {
 
 	        String sql = "SELECT pm.id AS id,pm.plan_code AS plan_code,pm.plan_description AS plan_description,pm.start_date AS start_date,pm.end_date AS end_date,"
 	        		   +"pm.plan_status AS plan_status,pm.provision_sys AS provisionSys,pm.bill_rule AS bill_rule,pm.duration AS contract_period,pm.is_prepaid as isPrepaid,"
-	        		  +" pm.allow_topup as allowTopup,v.volume_type as volumeType, v.units as units,v.units_type as unitType FROM b_plan_master pm  left join b_volume_details v" +
+	        		  +" pm.allow_topup as allowTopup,v.volume_type as volumeType, v.units as units,pm.is_hw_req as isHwReq,v.units_type as unitType FROM b_plan_master pm  left join b_volume_details v" +
 	        		  " on pm.id = v.plan_id WHERE pm.id = ? AND pm.is_deleted = 'n'";
 
 
@@ -250,13 +250,14 @@ public class PlanReadPlatformServiceImpl implements PlanReadPlatformService {
 	            String isPrepaid=rs.getString("isPrepaid");
 	            String volume=rs.getString("volumeType");
 	            String allowTopup=rs.getString("allowTopup");
+	            String isHwReq=rs.getString("isHwReq");
 	            String units=rs.getString("units");
 	            String unitType=rs.getString("unitType");
 
 	            //EnumOptionData status = SavingStatusEnumaration.OrderStatusType(plan_status);
 	            long status1=planStatus;
 	            return new PlanData(id,planCode,startDate,endDate,billRule,contractPeriod,status1,planDescription,status1,
-	            		provisionSys,null,isPrepaid,allowTopup,volume,units,unitType,null,null);
+	            		provisionSys,null,isPrepaid,allowTopup,volume,units,unitType,null,null,isHwReq);
 	        }
 	}
 
