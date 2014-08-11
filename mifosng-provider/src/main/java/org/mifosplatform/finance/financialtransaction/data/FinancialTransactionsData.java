@@ -35,6 +35,8 @@ public class FinancialTransactionsData {
 	private String transactionCategory;
 	private boolean flag;
 	private Long officeId;
+	private String description;
+	private String planCode;
 
 	public FinancialTransactionsData(final Long transactionId,final Date transactionDate,String transactionType,BigDecimal amount) {
 		this.transactionId = transactionId;
@@ -44,7 +46,8 @@ public class FinancialTransactionsData {
 	}
 
 	public FinancialTransactionsData(Long officeId,Long transactionId, LocalDate transDate,String transactionType, BigDecimal amount,
-			BigDecimal creditAmount, BigDecimal debitAmount,String userName, String transactionCategory, boolean flag) {
+			BigDecimal creditAmount, BigDecimal debitAmount,String userName, String transactionCategory, boolean flag,
+			String planCode,String description) {
 
 		this.officeId = officeId;
 		this.transactionId = transactionId;
@@ -57,7 +60,8 @@ public class FinancialTransactionsData {
 		this.userName=userName;
 		this.transactionCategory=transactionCategory;
 		this.flag=flag;
-
+		this.planCode = planCode;
+		this.description = description;
 	}
 
 
@@ -244,5 +248,22 @@ public class FinancialTransactionsData {
 		this.officeId = officeId;
 	}
 
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public String getPlanCode() {
+		return planCode;
+	}
+
+	public void setPlanCode(String planCode) {
+		this.planCode = planCode;
+	}
+     
+	
 
 }

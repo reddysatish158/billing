@@ -1074,10 +1074,15 @@ public class SynchronousCommandProcessingService implements
 					   }else{
 				           throw new UnsupportedCommandException(wrapper.commandName());
 				       }
+			    }else if(wrapper.isParentResource()){
+				     if(wrapper.isCreate()) {
+				         handler = applicationContext.getBean("createClientParentHandler",NewCommandSourceHandler.class);
+				     }else {
+				           throw new UnsupportedCommandException(wrapper.commandName());
+				     }
 			    }else {
 			               throw new UnsupportedCommandException(wrapper.commandName());
 		       }
-			       
 			   	
 	       return handler;
 	      

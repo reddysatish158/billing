@@ -51,7 +51,7 @@ public class OfficeFinancialTransactionReadPlatformServiceImpl implements Office
 			boolean flag=rs.getBoolean("flag");
 			LocalDate transDate=JdbcSupport.getLocalDate(rs,"TransDate");
 
-			return new FinancialTransactionsData(officeId,transactionId,transDate,transactionType,debitAmount,creditAmount,null,userName,transactionCategory,flag);
+			return new FinancialTransactionsData(officeId,transactionId,transDate,transactionType,debitAmount,creditAmount,null,userName,transactionCategory,flag,null,null);
 		}
      }
 }

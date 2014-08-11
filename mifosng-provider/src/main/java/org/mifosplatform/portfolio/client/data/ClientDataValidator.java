@@ -35,6 +35,7 @@ public final class ClientDataValidator {
 
     private final FromJsonHelper fromApiJsonHelper;
     private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("billMode"));
+    private final Set<String> supportedParentParameters = new HashSet<String>(Arrays.asList("accountNo","displayName"));
 
     @Autowired
     public ClientDataValidator(final FromJsonHelper fromApiJsonHelper) {
@@ -321,4 +322,25 @@ public final class ClientDataValidator {
 	
 		throwExceptionIfValidationWarningsExist(dataValidationErrors);
 	}
+
+	public void ValidateParent(JsonCommand command) {
+		
+		 final String json = command.json();
+			
+		 if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+
+	        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+	        fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParentParameters);
+
+	        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+	        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("parentclient");
+
+	        final JsonElement element = fromApiJsonHelper.parse(json);
+	        
+	        final String accountNo=this.fromApiJsonHelper.extractStringNamed("accountNo", element);
+	        baseDataValidator.reset().parameter("accountNo").value(accountNo).notBlank();
+	
+		throwExceptionIfValidationWarningsExist(dataValidationErrors);
+	}
+	
 }

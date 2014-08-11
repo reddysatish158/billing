@@ -46,7 +46,7 @@ public class BillMasterReadPlatformServiceImplementation implements
 		FinancialTransactionsMapper financialTransactionsMapper = new FinancialTransactionsMapper();
 		String sql = "select " + financialTransactionsMapper.financialTransactionsSchema();
 		return this.jdbcTemplate.query(sql, financialTransactionsMapper,
-				new Object[] { clientId,clientId,clientId,clientId,clientId });
+				new Object[] { clientId });
 
 	}
 
@@ -58,19 +58,22 @@ public class BillMasterReadPlatformServiceImplementation implements
 
 				throws SQLException {
 			Long transactionId = rs.getLong("transId");
-			Date transactionDate = rs.getDate("transDate");
 			String transactionType = rs.getString("transType");
 			BigDecimal amount = rs.getBigDecimal("amount");
 			LocalDate transDate=JdbcSupport.getLocalDate(rs,"transDate");
 			String transactionCategory=rs.getString("transType");
+			String description = rs.getString("description");
+			String planCode = rs.getString("planCode");
 			//boolean flag=rs.getBoolean("flag");
 
-			return new FinancialTransactionsData(null,transactionId,transDate,transactionType,null,null,amount,null,transactionCategory,false);
+			return new FinancialTransactionsData(null,transactionId,transDate,transactionType,null,null,amount,null,transactionCategory,false,planCode,description);
 		}
 
 		public String financialTransactionsSchema() {
 
-			return  	 " a.id as transId,Concat(Date_format(charge_start_date,'%Y-%m-%d'),' to ' ,Date_format(charge_end_date,'%Y-%m-%d')) transDate,'SERVICE_CHARGES' AS transType, charge_amount AS amount"
+			return    "SQL_CALC_FOUND_ROWS v.* from billdetails_v v where v.client_id=? ";
+					
+					/* " a.id as transId,Concat(Date_format(charge_start_date,'%Y-%m-%d'),' to ' ,Date_format(charge_end_date,'%Y-%m-%d')) transDate,'SERVICE_CHARGES' AS transType, charge_amount AS amount"
 						+" from b_charge a,b_invoice b, b_orders c where a.invoice_id=b.id and a.order_id=c.id"
 						+" and a.bill_id IS NULL AND invoice_date <= NOW() AND b.client_id = ?"
 						+" union all"
@@ -94,7 +97,7 @@ public class BillMasterReadPlatformServiceImplementation implements
 						+" union all"
 						+" SELECT a.id as transId ,Date_format(sale_date,'%Y-%m-%d') transDate,'ONETIME_CHARGES' AS transType,total_price  AS amount " 
 						+" FROM b_charge a,b_invoice b , b_onetime_sale c WHERE a.invoice_id=b.id and a.order_id=c.id and a.bill_id IS NULL AND c.sale_date <= NOW() AND b.client_id = ?";
-
+*/
 
 		}
 	}
@@ -153,7 +156,7 @@ public class BillMasterReadPlatformServiceImplementation implements
 			boolean flag=rs.getBoolean("flag");
 			LocalDate transDate=JdbcSupport.getLocalDate(rs,"TransDate");
 
-			return new FinancialTransactionsData(null,transactionId,transDate,transactionType,debitAmount,creditAmount,null,userName,transactionCategory,flag);
+			return new FinancialTransactionsData(null,transactionId,transDate,transactionType,debitAmount,creditAmount,null,userName,transactionCategory,flag,null,null);
 		}
 
 		public String financialTransactionsSchema() {
@@ -463,7 +466,7 @@ public class BillMasterReadPlatformServiceImplementation implements
 				boolean flag=rs.getBoolean("flag");
 				LocalDate transDate=JdbcSupport.getLocalDate(rs,"TransDate");
 				
-				return new FinancialTransactionsData(null,transactionId,transDate,transactionType,debitAmount,creditAmount,null,userName,transactionCategory,flag);
+				return new FinancialTransactionsData(null,transactionId,transDate,transactionType,debitAmount,creditAmount,null,userName,transactionCategory,flag,null,null);
 			}
 
 			public String financialTypeSchema() {

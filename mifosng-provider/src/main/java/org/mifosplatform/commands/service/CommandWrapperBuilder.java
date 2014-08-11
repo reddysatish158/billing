@@ -2381,6 +2381,14 @@ public CommandWrapperBuilder editGrn(Long id) {
 	return this;
 }
 
+public CommandWrapperBuilder createClientParent(Long clientId) {
+	this.actionName = "CREATE";
+	this.entityName = "PARENTCLIENT";
+	this.entityId = clientId;
+	this.href = "/parentclient/" +clientId;
+	return this;
+}
+
 
 }
 

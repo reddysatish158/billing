@@ -1130,4 +1130,8 @@ public class CommandWrapper {
 		public boolean isDeleteEventValidation() {
 			return this.actionName.equalsIgnoreCase("DELETE") && this.entityName.equalsIgnoreCase("EVENTVALIDATION");
 		}
+		
+		public boolean isParentResource() {
+			return this.actionName.equalsIgnoreCase("CREATE") && this.entityName.equalsIgnoreCase("PARENTCLIENT");
+		}
 }

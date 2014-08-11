@@ -487,4 +487,32 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 		return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(clientBillMode.getId()).build();
 	}
 
+	@Override
+	public CommandProcessingResult createClientParent(Long entityId,JsonCommand command) {
+		Client childClient=null;
+		Client parentClient=null;
+		try {
+			childClient = this.clientRepository.findOneWithNotFoundDetection(entityId);
+			 this.fromApiJsonDeserializer.ValidateParent(command);
+			final String parentDisplayName=command.stringValueOfParameterNamed("displayName");
+			final String parentAcntId=command.stringValueOfParameterNamed("accountNo");
+			parentClient=this.clientRepository.findOneWithAccountId(parentAcntId);
+			if(parentClient.getParentId() == null && !parentClient.getId().equals(childClient.getId()))
+			{	
+				childClient.setParentId(parentClient.getId());
+				this.clientRepository.save(childClient);
+			}else if(parentClient.getId().equals(childClient.getId())){
+				final String errorMessage="himself can not be parent to his account.";
+				throw new InvalidClientStateTransitionException("Not parent", "himself.can.not.be.parent.to his.account", errorMessage);
+			}else{
+				final String errorMessage="can not be parent to this account.";
+				throw new InvalidClientStateTransitionException("Not parent", "can.not.be.parent.to his.account", errorMessage);
+			  }
+		}catch(DataIntegrityViolationException dve){
+			 handleDataIntegrityIssues(command, dve);
+	            return CommandProcessingResult.empty();
+		}
+		 return new CommandProcessingResultBuilder().withEntityId(childClient.getId()).build();
+	}
+
 }
