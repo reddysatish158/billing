@@ -13,8 +13,7 @@ public interface IpPoolManagementReadPlatformService {
 
 	Long checkIpAddress(String ipaddress);
 
-	Page<IpPoolManagementData> retrieveIpPoolData(
-			SearchSqlQuery searchItemDetails, String type, String[] data);
+	Page<IpPoolManagementData> retrieveIpPoolData(SearchSqlQuery searchItemDetails, String type, String[] data);
 
 	List<String> retrieveIpPoolIDArray(String query);
 

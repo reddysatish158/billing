@@ -272,7 +272,7 @@ public class CommandWrapper {
     }
     
     public boolean isActivationProcessResource() {
-        return this.entityName.equalsIgnoreCase("ACTIVATE");
+        return this.entityName.equalsIgnoreCase("ACTIVATE") && this.entityName.equalsIgnoreCase("ACTIVATIONPROCESS");
     }
 
     public boolean isClientActivation() {
@@ -760,7 +760,7 @@ public class CommandWrapper {
 		}
 
 		public boolean isSelfCare() {
-			return this.entityName.equalsIgnoreCase("SELFCARE") && this.actionName.equalsIgnoreCase("CREATE");
+			return this.entityName.equalsIgnoreCase("SELFCARE");
 		}
 		
 		public boolean isSelfCareUDP() {
@@ -1133,5 +1133,25 @@ public class CommandWrapper {
 		
 		public boolean isParentResource() {
 			return this.actionName.equalsIgnoreCase("CREATE") && this.entityName.equalsIgnoreCase("PARENTCLIENT");
+		}
+
+		public boolean isUpdateIpStatus() {
+			return this.actionName.equalsIgnoreCase("UPDATEIPSTATUS") && this.entityName.equalsIgnoreCase("IPPOOLMANAGEMENT");
+		}
+
+		public boolean isOrderSuspend() {
+			return this.actionName.equalsIgnoreCase("SUSPEND") && this.entityName.equalsIgnoreCase("ORDER");
+		}
+		public boolean isSelfCareRegister() {
+			return this.actionName.equalsIgnoreCase("REGISTER") && this.entityName.equalsIgnoreCase("SELFCARE");
+		}
+
+		public boolean isSelfCareEmailVerification() {
+			return this.actionName.equalsIgnoreCase("EMAILVERIFICATION") && this.entityName.equalsIgnoreCase("SELFCARE");
+		}
+
+		public boolean isSelfRegistrationResource() {
+			return this.actionName.equalsIgnoreCase("SELFREGISTRATION") && this.entityName.equalsIgnoreCase("ACTIVATE");
+
 		}
 }

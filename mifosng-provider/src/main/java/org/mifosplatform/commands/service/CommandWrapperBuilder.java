@@ -2387,6 +2387,41 @@ public CommandWrapperBuilder createClientParent(Long clientId) {
 	this.entityId = clientId;
 	this.href = "/parentclient/" +clientId;
 	return this;
+  }
+public CommandWrapperBuilder updateIpStatus() {
+	this.actionName = "UPDATEIPSTATUS";
+	this.entityName = "IPPOOLMANAGEMENT";
+	this.href = "itemdetails/editgrn";
+	return this;
+	}
+
+public CommandWrapperBuilder suspendOrder(Long orderId) {
+	
+	this.actionName = "SUSPEND";
+	this.entityName = "ORDER";
+	this.entityId=orderId;
+	this.href = "suspend/"+orderId;
+	return this;
+}
+public CommandWrapperBuilder registerSelfCareRegister() {
+	this.actionName = "REGISTER";
+	this.entityName = "SELFCARE";
+	this.href = "/selfcare/register";
+	return this;
+}
+
+public CommandWrapperBuilder SelfCareEmailVerification() {
+	this.actionName = "EMAILVERIFICATION";
+	this.entityName = "SELFCARE";
+	this.href = "/selfcare/register";
+	return this;
+}
+
+public CommandWrapperBuilder selfRegistrationProcess() {
+	this.actionName = "SELFREGISTRATION";
+	this.entityName = "ACTIVATE";
+	this.href = "/activationprocess/selfregistration";
+	return this;
 }
 
 

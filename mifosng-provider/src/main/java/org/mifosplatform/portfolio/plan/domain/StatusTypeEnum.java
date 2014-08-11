@@ -8,7 +8,8 @@ public enum StatusTypeEnum {
 	DISCONNECTED(3, "CategoryType.disconnected"),
 	PENDING(4,"CategoryType.pending"),
 	TERMINATED(5,"CategoryType.terminate"),
-	INVALID(6, "CategoryType.invalid");
+	SUSPENDED(6,"CategoryType.suspend"),
+	INVALID(7, "CategoryType.invalid");
 
 
     private final Integer value;
@@ -49,7 +50,9 @@ public enum StatusTypeEnum {
 		case 5:
 			repaymentFrequencyType = StatusTypeEnum.TERMINATED;
 			break;
-			
+		case 6:
+			repaymentFrequencyType = StatusTypeEnum.SUSPENDED;
+			break;	
 		default:
 			repaymentFrequencyType = StatusTypeEnum.INVALID;
 			break;

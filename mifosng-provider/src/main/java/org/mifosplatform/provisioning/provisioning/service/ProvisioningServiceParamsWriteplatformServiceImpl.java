@@ -58,11 +58,10 @@ public class ProvisioningServiceParamsWriteplatformServiceImpl implements Provis
 	private final ServiceParametersRepository serviceParametersRepository;
 	private final IpPoolManagementJpaRepository ipPoolManagementJpaRepository;
 	private final InventoryItemDetailsRepository inventoryItemDetailsRepository;
-	private final ProvisioningCommandFromApiJsonDeserializer fromApiJsonDeserializer;
     private final IpPoolManagementReadPlatformService ipPoolManagementReadPlatformService;
   
 @Autowired	
-public ProvisioningServiceParamsWriteplatformServiceImpl(final PlatformSecurityContext securityContext,final ProvisioningCommandFromApiJsonDeserializer fromApiJsonDeserializer,
+public ProvisioningServiceParamsWriteplatformServiceImpl(final PlatformSecurityContext securityContext,
 		final FromJsonHelper fromJsonHelper,final ServiceParametersRepository parametersRepository,final PrepareRequsetRepository prepareRequsetRepository,
 		final ProcessRequestRepository processRequestRepository,final OrderRepository orderRepository,final InventoryItemDetailsRepository detailsRepository,
 		final IpPoolManagementJpaRepository ipPoolManagementJpaRepository,final ServiceMasterRepository masterRepository,
@@ -73,7 +72,6 @@ public ProvisioningServiceParamsWriteplatformServiceImpl(final PlatformSecurityC
 	this.fromApiJsonHelper=fromJsonHelper;
 	this.clientRepository=clientRepository;
 	this.serviceMasterRepository=masterRepository;
-	this.fromApiJsonDeserializer=fromApiJsonDeserializer;
 	this.inventoryItemDetailsRepository=detailsRepository;
 	this.serviceParametersRepository=parametersRepository;
 	this.prepareRequsetRepository=prepareRequsetRepository;

@@ -12,6 +12,8 @@ public interface IpPoolManagementWritePlatformService {
 	CommandProcessingResult updateIpStatus(Long entityId);
 
 	CommandProcessingResult updateIpDescription(JsonCommand command);
+
+	CommandProcessingResult updateIpAddressStatus(JsonCommand command);
 	
 
 }

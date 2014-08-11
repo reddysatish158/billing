@@ -32,7 +32,8 @@ public final class OrderCommandFromApiJsonDeserializer {
      */
     private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("planCode","locale","dateFormat","start_date","paytermCode",
     		"contractPeriod","billAlign","price","description","renewalPeriod","disconnectReason","isPrepaid","disconnectionDate","ispaymentEnable",
-    		"paymentCode","amountPaid","paymentDate","receiptNo","promoId","startDate","isNewplan"));
+    		"paymentCode","amountPaid","paymentDate","receiptNo","promoId","startDate","isNewplan","suspensionDate","suspensionReason",
+    		"suspensionDescription"));
     private final Set<String> retracksupportedParameters = new HashSet<String>(Arrays.asList("commandName","message","orderId"));
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -163,6 +164,25 @@ public final class OrderCommandFromApiJsonDeserializer {
         baseDataValidator.reset().parameter("startDate").value(startDate).notBlank();
       
        
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+		
+	}
+
+	public void validateForOrderSuspension(String json) {
+		
+		if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("order");
+        final JsonElement element = fromApiJsonHelper.parse(json);
+        final LocalDate suspensionDate=fromApiJsonHelper.extractLocalDateNamed("suspensionDate", element);
+        baseDataValidator.reset().parameter("suspensionDate").value(suspensionDate).notBlank();
+        final String suspensionReason = fromApiJsonHelper.extractStringNamed("suspensionReason", element);
+        baseDataValidator.reset().parameter("suspensionReason").value(suspensionReason).notBlank();
+        final String suspensionDescription = fromApiJsonHelper.extractStringNamed("suspensionDescription", element);
+        baseDataValidator.reset().parameter("suspensionDescription").value(suspensionDescription).notBlank();
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
 		
 	}

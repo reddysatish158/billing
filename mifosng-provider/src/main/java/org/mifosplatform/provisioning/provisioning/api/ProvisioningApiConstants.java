@@ -18,6 +18,7 @@ public class ProvisioningApiConstants {
 	public static final String PROV_DATA_NEW_IPTYPE="new_ip_type";
 	public static final String PROV_DATA_OLD_IPTYPE="old_ip_type";
 	public static final String PROV_DATA_IPADDRESS="IP_ADDRESS";
+	public static final String PROV_DATA_SERVICE="SERVICE";
 	public static final String PROV_DATA_OLD_IPADDRESS="OLD_IP_ADDRESS";
 	public static final String PROV_DATA_NEW_IPADDRESS="NEW_IP_ADDRESS";
 	public static final String PROV_DATA_SERVICETYPE="service_type";
@@ -29,5 +30,6 @@ public class ProvisioningApiConstants {
 	public static final String PROV_DATA_SUBNET="subnet";
 	public static final String PROV_DATA_OLD_SERIALNO="OLD_SERIALNO";
 	public static final String PROV_DATA_NEW_SERIALNO="NEW_SERIALNO";
+	public static final String PROV_DATA_OLD_ORDERID="ORDER_ID";
 
 }

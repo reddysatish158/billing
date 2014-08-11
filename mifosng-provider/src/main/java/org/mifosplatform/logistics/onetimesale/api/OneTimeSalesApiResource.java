@@ -40,6 +40,8 @@ import org.mifosplatform.logistics.onetimesale.service.OneTimeSaleReadPlatformSe
 import org.mifosplatform.logistics.onetimesale.service.OneTimeSaleWritePlatformService;
 import org.mifosplatform.organisation.office.data.OfficeData;
 import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
+import org.mifosplatform.portfolio.contract.data.SubscriptionData;
+import org.mifosplatform.portfolio.contract.service.ContractPeriodReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -54,7 +56,7 @@ import com.google.gson.JsonElement;
 public class OneTimeSalesApiResource {
 	private  final Set<String> RESPONSE_DATA_PARAMETERS=new HashSet<String>(Arrays.asList("itemId","chargedatas","itemDatas",
             "units","unitPrice","saleDate","totalprice","quantity","flag","allocationData","discountMasterDatas","id","eventName","bookedDate",
-            "eventPrice","chargeCode","status"));
+            "eventPrice","chargeCode","status","contractPeriods"));
     private final String resourceNameForPermissions = "ONETIMESALE";
     private final PlatformSecurityContext context;
 	private final DefaultToApiJsonSerializer<OneTimeSaleData> toApiJsonSerializer;
@@ -68,25 +70,29 @@ public class OneTimeSalesApiResource {
 	private final EventOrderReadplatformServie eventOrderReadplatformServie;
 	private final FromJsonHelper fromJsonHelper;
 	private final OfficeReadPlatformService officeReadPlatformService;
+	private final ContractPeriodReadPlatformService contractPeriodReadPlatformService;
 		 @Autowired
 	    public OneTimeSalesApiResource(final PlatformSecurityContext context,final DefaultToApiJsonSerializer<OneTimeSaleData> toApiJsonSerializer,
 	    final ApiRequestParameterHelper apiRequestParameterHelper,final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
 	    final OneTimeSaleWritePlatformService oneTimeSaleWritePlatformService,final OneTimeSaleReadPlatformService oneTimeSaleReadPlatformService,
-	    final ItemReadPlatformService itemReadPlatformService,final PriceReadPlatformService priceReadPlatformService,final EventOrderReadplatformServie eventOrderReadplatformServie,
+	    final ItemReadPlatformService itemReadPlatformService,final PriceReadPlatformService priceReadPlatformService,
+	    final EventOrderReadplatformServie eventOrderReadplatformServie,final OfficeReadPlatformService officeReadPlatformService,
 	    final DefaultToApiJsonSerializer<ItemData> defaultToApiJsonSerializer,final FromJsonHelper fromJsonHelper,
-	    final OfficeReadPlatformService officeReadPlatformService) {
-		        this.context = context;
+	    final ContractPeriodReadPlatformService contractPeriodReadPlatformService) {
+		        
+			    this.context = context;
+		        this.fromJsonHelper=fromJsonHelper;
 		        this.toApiJsonSerializer = toApiJsonSerializer;
+		        this.priceReadPlatformService=priceReadPlatformService;
+		        this.officeReadPlatformService=officeReadPlatformService;
+		        this.defaultToApiJsonSerializer=defaultToApiJsonSerializer;
+		        this.itemMasterReadPlatformService=itemReadPlatformService;
 		        this.apiRequestParameterHelper = apiRequestParameterHelper;
+		        this.eventOrderReadplatformServie=eventOrderReadplatformServie;
+		        this.oneTimeSaleReadPlatformService=oneTimeSaleReadPlatformService;
+		        this.oneTimeSaleWritePlatformService=oneTimeSaleWritePlatformService;
 		        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-                this.oneTimeSaleWritePlatformService=oneTimeSaleWritePlatformService;
-                this.oneTimeSaleReadPlatformService=oneTimeSaleReadPlatformService;
-                this.itemMasterReadPlatformService=itemReadPlatformService;
-                this.priceReadPlatformService=priceReadPlatformService;
-                this.defaultToApiJsonSerializer=defaultToApiJsonSerializer;
-                this.fromJsonHelper=fromJsonHelper;
-                this.eventOrderReadplatformServie=eventOrderReadplatformServie;
-                this.officeReadPlatformService=officeReadPlatformService;
+                this.contractPeriodReadPlatformService=contractPeriodReadPlatformService;
 		 }		
 		
 	
@@ -115,11 +121,13 @@ public class OneTimeSalesApiResource {
 	}
 
 	private OneTimeSaleData handleTemplateRelatedData(OneTimeSaleData salesData) {
-		List<ChargesData> chargeDatas = this.priceReadPlatformService.retrieveChargeCode();
-		List<ItemData> itemData = this.oneTimeSaleReadPlatformService.retrieveItemData();
-		final Collection<OfficeData> offices = officeReadPlatformService.retrieveAllOfficesForDropdown();
-		List<DiscountMasterData> discountdata = this.priceReadPlatformService.retrieveDiscountDetails();
-		return new OneTimeSaleData(chargeDatas,itemData,salesData,discountdata,offices);
+			List<ChargesData> chargeDatas = this.priceReadPlatformService.retrieveChargeCode();
+			List<ItemData> itemData = this.oneTimeSaleReadPlatformService.retrieveItemData();
+			final Collection<OfficeData> offices = officeReadPlatformService.retrieveAllOfficesForDropdown();
+			List<DiscountMasterData> discountdata = this.priceReadPlatformService.retrieveDiscountDetails();
+			Collection<SubscriptionData> subscriptionDatas=this.contractPeriodReadPlatformService.retrieveAllSubscription();
+			return new OneTimeSaleData(chargeDatas,itemData,salesData,discountdata,offices,subscriptionDatas);
+			
 	}
 	
 	@GET

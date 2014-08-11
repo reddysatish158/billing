@@ -553,6 +553,8 @@ public class SynchronousCommandProcessingService implements
 				handler = applicationContext.getBean("orderExtensionCommandHandler",NewCommandSourceHandler.class);
 			}else if (wrapper.isOrderTerminate()) {
 				handler = applicationContext.getBean("orderTerminationCommandHandler",NewCommandSourceHandler.class);
+			}else if (wrapper.isOrderSuspend()) {
+				handler = applicationContext.getBean("orderSuspendCommandHandler",NewCommandSourceHandler.class);
 			}
 		} else if (wrapper.isOrderScheduling()) {
 			if (wrapper.isCreate()) {
@@ -820,7 +822,13 @@ public class SynchronousCommandProcessingService implements
 		    }else if(wrapper.isSelfCare()){
 			    	   if(wrapper.isCreate()){
 			    		   handler = applicationContext.getBean("createSelfCareCommandHandler",NewCommandSourceHandler.class);
-			    	   }
+			    	   } else if(wrapper.isSelfCareRegister()) {
+			        		handler = applicationContext.getBean("registerSelfCareCommandHandler",NewCommandSourceHandler.class);	
+					   } else if(wrapper.isSelfCareEmailVerification()) {
+			        		handler = applicationContext.getBean("emailVerificationSelfCareCommandHandler",NewCommandSourceHandler.class);	
+					   } else{
+				           throw new UnsupportedCommandException(wrapper.commandName());
+				       }
 			}else if(wrapper.isSelfCareUDP()){
 		    	   if(wrapper.isCreateSelfCareUDP()){
 		    		   handler = applicationContext.getBean("createSelfCareUDPCommandHandler",NewCommandSourceHandler.class);
@@ -976,6 +984,9 @@ public class SynchronousCommandProcessingService implements
 				     }else if(wrapper.isUpdate()) {
 				         handler = applicationContext.getBean("updateIpPoolManagementCommandHandler",NewCommandSourceHandler.class);
 				   
+				     }else if(wrapper.isUpdateIpStatus()) {
+				         handler = applicationContext.getBean("updateIpAddressStatusCommandHandler",NewCommandSourceHandler.class);
+				   
 				     }else {
 				           throw new UnsupportedCommandException(wrapper.commandName());
 				     }
@@ -1080,6 +1091,8 @@ public class SynchronousCommandProcessingService implements
 				     }else {
 				           throw new UnsupportedCommandException(wrapper.commandName());
 				     }
+			    }else if(wrapper.isSelfRegistrationResource()){
+			        		handler = applicationContext.getBean("createSelfRegistrationCommandHandler",NewCommandSourceHandler.class);
 			    }else {
 			               throw new UnsupportedCommandException(wrapper.commandName());
 		       }
