@@ -750,6 +750,19 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 		}catch(EmptyResultDataAccessException e){
 			return null;
 		  }
+		}
+
+		@Override
+		public Boolean countChildClients(Long entityId) {
+			 context.authenticatedUser();
+			 boolean result = false;
+			 final String sql="select count(id) from m_client m where m.parent_id= ? ";
+			 int count=	this.jdbcTemplate.queryForObject(sql, Integer.class,new Object[]{entityId});
+			 if(count > 0){
+				 result = true;
+			 }
+			 return result;
+			 
 		}	
 		
 }
