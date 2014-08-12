@@ -137,6 +137,9 @@ public final class Client extends AbstractPersistable<Long> {
 
     @Column(name = "is_indororp",nullable = false)
  	private String entryType;
+    
+    @Column(name = "parent_id",nullable = true)
+ 	 private Long parentId;
 
 
 
@@ -631,5 +634,12 @@ public final class Client extends AbstractPersistable<Long> {
 	        this.status = ClientStatus.CLOSED.getValue();
 	    }
 
-    
+	public Long getParentId() {
+		return parentId;
+	}
+
+	public void setParentId(Long parentId) {
+		this.parentId = parentId;
+	}
+   
 }

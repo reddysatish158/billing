@@ -35,19 +35,27 @@ public class BillDetail {
 
 	@Column(name = "Amount")
 	private BigDecimal amount;
+	
+	@Column(name = "plan_code")
+	private String planCode;
+	
+	@Column(name = "description")
+	private String description;
 
 	protected BillDetail() {
 
 	}
 
 	public BillDetail(final BillMaster billId,final Long transactionId ,final Date transactionDate, final String transactionType,
-			final BigDecimal amount) {
+			final BigDecimal amount,final String planCode, final String description) {
 
 		this.billMaster = billId;
 		this.transactionId = transactionId;
 		this.transactionDate = transactionDate;
 		this.transactionType = transactionType;
 		this.amount = amount;
+		this.planCode = planCode;
+		this.description = description;
 
 	}
 
@@ -102,8 +110,23 @@ public class BillDetail {
 	public void updateBillMaster(BillMaster billMaster) {
            this.billMaster=billMaster;
 		
-		
 	}
 
+	public String getPlanCode() {
+		return planCode;
+	}
+
+	public void setPlanCode(String planCode) {
+		this.planCode = planCode;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+    
 
 }

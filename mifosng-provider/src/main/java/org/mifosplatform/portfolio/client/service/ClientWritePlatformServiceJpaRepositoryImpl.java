@@ -8,6 +8,7 @@ package org.mifosplatform.portfolio.client.service;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -41,6 +42,7 @@ import org.mifosplatform.portfolio.client.data.ClientDataValidator;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGenerator;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGeneratorFactory;
 import org.mifosplatform.portfolio.client.domain.Client;
+import org.mifosplatform.portfolio.client.domain.ClientRepository;
 import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
 import org.mifosplatform.portfolio.client.domain.ClientStatus;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
@@ -91,6 +93,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     private final OrderReadPlatformService orderReadPlatformService;
     private final PrepareRequestWriteplatformService prepareRequestWriteplatformService;
     private final ProvisioningWritePlatformService ProvisioningWritePlatformService;
+    private final ClientReadPlatformService clientReadPlatformService;
+  
     
    
 
@@ -102,7 +106,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             final ActionDetailsReadPlatformService actionDetailsReadPlatformService,final CodeValueRepository codeValueRepository,
             final OrderReadPlatformService orderReadPlatformService,final ProvisioningWritePlatformService  ProvisioningWritePlatformService,
             final GroupsDetailsRepository groupsDetailsRepository,final OrderRepository orderRepository,final PlanRepository planRepository,
-            final PrepareRequestWriteplatformService prepareRequestWriteplatformService) {
+            final PrepareRequestWriteplatformService prepareRequestWriteplatformService,final ClientReadPlatformService clientReadPlatformService) {
     	
         this.context = context;
         this.clientRepository = clientRepository;
@@ -121,6 +125,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         this.ProvisioningWritePlatformService=ProvisioningWritePlatformService;
         this.groupsDetailsRepository=groupsDetailsRepository;
         this.planRepository=planRepository;
+        this.clientReadPlatformService = clientReadPlatformService;
+       
     }
 
     @Transactional
@@ -485,6 +491,37 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 		}
 		
 		return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(clientBillMode.getId()).build();
+	}
+
+	@Override
+	public CommandProcessingResult createClientParent(Long entityId,JsonCommand command) {
+		Client childClient=null;
+		Client parentClient=null;
+		try {
+			this.fromApiJsonDeserializer.ValidateParent(command);
+			final String parentAcntId=command.stringValueOfParameterNamed("accountNo");
+			childClient = this.clientRepository.findOneWithNotFoundDetection(entityId);
+			Boolean count =this.clientReadPlatformService.countChildClients(entityId);
+			parentClient=this.clientRepository.findOneWithAccountId(parentAcntId);
+	    	if(parentClient.getParentId() == null && !parentClient.getId().equals(childClient.getId())&&count.equals(false)){	
+				childClient.setParentId(parentClient.getId());
+				this.clientRepository.save(childClient);
+			}else if(parentClient.getId().equals(childClient.getId())){
+				final String errorMessage="himself can not be parent to his account.";
+				throw new InvalidClientStateTransitionException("Not parent", "himself.can.not.be.parent.to his.account", errorMessage);
+			}else if(count){ 
+				final String errorMessage="he is already parent to some other clients";
+				throw new InvalidClientStateTransitionException("Not Parent", "he.is. already. a parent.to.some other clients", errorMessage);
+			}else{
+				final String errorMessage="can not be parent to this account.";
+				throw new InvalidClientStateTransitionException("Not parent", "can.not.be.parent.to this.account", errorMessage);
+			  }
+			
+			}catch(DataIntegrityViolationException dve){
+			 handleDataIntegrityIssues(command, dve);
+	            return CommandProcessingResult.empty();
+		}
+		 return new CommandProcessingResultBuilder().withEntityId(childClient.getId()).build();
 	}
 
 }

@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
+import org.joda.time.Months;
 import org.mifosplatform.billing.taxmaster.data.TaxMappingRateData;
 import org.mifosplatform.finance.billingorder.commands.BillingOrderCommand;
 import org.mifosplatform.finance.billingorder.commands.InvoiceTaxCommand;
@@ -376,6 +377,8 @@ public class GenerateBill {
 		if (startDate.isEqual(endDate)) {
 			totalDays = 0;
 		} else {
+			//int  numberOfMonths = Months.monthsBetween(startDate,endDate).getMonths();
+			//LocalDate tempBillEndDate = endDate.minusMonths(numberOfMonths);
 			totalDays = Days.daysBetween(startDate, endDate).getDays() + 1;
 		}
 

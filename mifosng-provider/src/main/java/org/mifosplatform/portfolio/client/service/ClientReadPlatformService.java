@@ -6,6 +6,7 @@
 package org.mifosplatform.portfolio.client.service;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.portfolio.client.data.ClientAccountSummaryCollectionData;
@@ -40,6 +41,12 @@ public interface ClientReadPlatformService {
 	ClientData retrieveAllClosureReasons(String clientClosureReason);
 
 	ClientCategoryData retrieveClientBillModes(Long clientId);
+
+	List<ClientCategoryData> retrievingParentClients(String query);
+
+	ClientCategoryData retrievingClientParentData(Long parentClientId);
+
+	Boolean countChildClients(Long entityId);
 
 
 	

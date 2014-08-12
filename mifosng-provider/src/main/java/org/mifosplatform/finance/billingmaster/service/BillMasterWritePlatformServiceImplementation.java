@@ -116,8 +116,8 @@ public class BillMasterWritePlatformServiceImplementation implements
 		for (FinancialTransactionsData financialTransactionsData : financialTransactionsDatas) {
 			
 			BillDetail billDetail = new BillDetail(null,financialTransactionsData.getTransactionId(),
-					financialTransactionsData.getTransactionDate(),	financialTransactionsData.getTransactionType(),
-					financialTransactionsData.getDebitAmount());
+					financialTransactionsData.getTransDate().toDate(),	financialTransactionsData.getTransactionType(),
+					financialTransactionsData.getDebitAmount(),financialTransactionsData.getPlanCode(),financialTransactionsData.getDescription());
 			//this.billDetailRepository.save(billDetail);
 			listOfBillingDetail.add(billDetail);
 		    billMaster.addBillDetails(billDetail);
