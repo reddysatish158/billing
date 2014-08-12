@@ -49,6 +49,9 @@ public class UserActionStatusEnumaration {
 			
 		case TERMINATION:
 			optionData = new EnumOptionData(UserActionStatusTypeEnum.TERMINATION.getValue().longValue(), codePrefix + UserActionStatusTypeEnum.TERMINATION.getCode(), "TERMINATION"); 
+			break;
+		case REACTIVATION:
+			optionData = new EnumOptionData(UserActionStatusTypeEnum.REACTIVATION.getValue().longValue(), codePrefix + UserActionStatusTypeEnum.REACTIVATION.getCode(), "REACTIVATION"); 
 			break;	
 		
 		default:

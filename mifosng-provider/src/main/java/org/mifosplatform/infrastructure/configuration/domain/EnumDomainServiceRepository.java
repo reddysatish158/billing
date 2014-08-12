@@ -13,6 +13,6 @@ import org.springframework.data.repository.query.Param;
 public interface EnumDomainServiceRepository extends JpaRepository<EnumDomainService, Long>,
         JpaSpecificationExecutor<EnumDomainService> {
 
-	@Query("from EnumDomainService enumDomainService where enumDomainService.enumMessageProperty =:enumMessageProperty")
+	@Query("from EnumDomainService enumDomainService where enumDomainService.enumMessageProperty =:enumMessageProperty and enumDomainService.enumName='order_status'")
 	EnumDomainService findOneByEnumMessageProperty(@Param("enumMessageProperty")String enumMessageProperty);
 }
