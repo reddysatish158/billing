@@ -16,7 +16,7 @@ public class InvalidClientStateTransitionException extends AbstractPlatformDomai
     public InvalidClientStateTransitionException(final String action, final String postFix, final String defaultUserMessage,
             final Object... defaultUserMessageArgs) {
         super("error.msg.client." + action + "." + postFix, defaultUserMessage, defaultUserMessageArgs);
-        // TODO Auto-generated constructor stub
+       
     }
 
 }
