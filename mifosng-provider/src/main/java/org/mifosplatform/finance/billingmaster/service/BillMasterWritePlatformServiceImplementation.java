@@ -156,6 +156,10 @@ public class BillMasterWritePlatformServiceImplementation implements
 		context.authenticatedUser();
 		Client client=this.clientRepository.findOne(billMaster.getClientId());
 		String clientEmail=client.getEmail();
+		if(clientEmail == null){
+			String msg="Please provide email first";
+			throw new BillingOrderNoRecordsFoundException(msg,client);
+		}
 		String filePath=billMaster.getFileName();
 		BillingMessage billingMessage=null;
 		List<BillingMessageTemplate> billingMessageTemplate=this.messageTemplateRepository.findAll();
