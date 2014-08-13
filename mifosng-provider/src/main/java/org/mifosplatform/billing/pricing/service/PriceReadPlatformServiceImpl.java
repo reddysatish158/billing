@@ -312,6 +312,41 @@ private static final class PricingMapper implements RowMapper<PricingData> {
      }
 }
 
+@Override
+public List<PricingData> retrievePlanAndPriceDetails() {
+	
+	try{
+		this.context.authenticatedUser();
+		PlanAndPricingMapper mapper=new PlanAndPricingMapper();  
+		String sql=" SELECT pr.id as priceId,cp.id as contractId, pm.plan_code as planCode,pr.plan_id as planId,c.charge_description as chargeDescription," +
+				"  pm.duration as contractPeriod,c.billfrequency_code as billingFrequencyCode,(SELECT sum(r.price) FROM b_plan_pricing r WHERE r.plan_id = pm.id " +
+				"  and r.charge_code = c.charge_code ) AS price FROM b_plan_pricing pr, b_charge_codes c, b_plan_master pm left join b_contract_period cp on " +
+				"  cp.contract_period = pm.duration WHERE pr.charge_code = c.charge_code AND pr.charge_code = c.charge_code and pr.plan_id = pm.id GROUP BY pm.id";
+		
+		 return this.jdbcTemplate.query(sql, mapper, new Object[] {  });
+		
+	}catch(EmptyResultDataAccessException e){
+		return null;
+	}
+}
+
+private static final class PlanAndPricingMapper implements RowMapper<PricingData> {
+
+    @Override
+    public PricingData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+
+	  Long planId = rs.getLong("planId");
+	  Long priceId = rs.getLong("priceId");
+	  Long contractId = rs.getLong("contractId");
+	  String planCode = rs.getString("planCode");
+      BigDecimal price = rs.getBigDecimal("price");
+      String chargeDescription = rs.getString("chargeDescription");
+      String contractPeriod = rs.getString("contractPeriod");
+      String billingFrequencyCode=rs.getString("billingFrequencyCode");
+        return new PricingData(planId,priceId,planCode,contractId,contractPeriod,price,chargeDescription,billingFrequencyCode);
+    }
+}
+
 
 
 }

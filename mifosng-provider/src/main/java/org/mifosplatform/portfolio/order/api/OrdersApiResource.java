@@ -381,5 +381,15 @@ public class OrdersApiResource {
 	return this.toApiJsonSerializer.serialize(result);
 	}
 	
+	 @PUT
+		@Path("reactive/{orderId}")
+		@Consumes({ MediaType.APPLICATION_JSON })
+		@Produces({ MediaType.APPLICATION_JSON })
+		public String reactiveOrder(@PathParam("orderId") final Long orderId,final String apiRequestBodyAsJson) {
+		 final CommandWrapper commandRequest = new CommandWrapperBuilder().reactiveOrder(orderId).withJson(apiRequestBodyAsJson).build();
+		 final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+		  return this.toApiJsonSerializer.serialize(result);
+
+		}
 
 }

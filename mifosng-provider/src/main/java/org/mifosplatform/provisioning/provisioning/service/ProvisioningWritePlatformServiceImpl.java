@@ -32,12 +32,12 @@ import org.mifosplatform.portfolio.order.service.OrderReadPlatformService;
 import org.mifosplatform.portfolio.plan.domain.UserActionStatusTypeEnum;
 import org.mifosplatform.portfolio.service.domain.ServiceMaster;
 import org.mifosplatform.portfolio.service.domain.ServiceMasterRepository;
-import org.mifosplatform.provisioning.preparerequest.domain.PrepareRequest;
 import org.mifosplatform.provisioning.preparerequest.domain.PrepareRequsetRepository;
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequest;
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestDetails;
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestRepository;
 import org.mifosplatform.provisioning.processrequest.service.ProcessRequestReadplatformService;
+import org.mifosplatform.provisioning.processrequest.service.ProcessRequestWriteplatformService;
 import org.mifosplatform.provisioning.provisioning.api.ProvisioningApiConstants;
 import org.mifosplatform.provisioning.provisioning.data.ServiceParameterData;
 import org.mifosplatform.provisioning.provisioning.domain.ProvisioningCommand;
@@ -45,6 +45,7 @@ import org.mifosplatform.provisioning.provisioning.domain.ProvisioningCommandPar
 import org.mifosplatform.provisioning.provisioning.domain.ProvisioningCommandRepository;
 import org.mifosplatform.provisioning.provisioning.domain.ServiceParameters;
 import org.mifosplatform.provisioning.provisioning.domain.ServiceParametersRepository;
+import org.mifosplatform.provisioning.provisioning.exceptions.ProvisioningRequestNotFoundException;
 import org.mifosplatform.provisioning.provisioning.serialization.ProvisioningCommandFromApiJsonDeserializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -67,7 +68,6 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
     private final ClientRepository clientRepository;
     private final ServiceMasterRepository serviceMasterRepository;
     private final ProcessRequestRepository processRequestRepository;
-    private final PrepareRequsetRepository prepareRequsetRepository;
     private final OrderReadPlatformService orderReadPlatformService;
     private final HardwareAssociationRepository associationRepository;
     private final ServiceParametersRepository serviceParametersRepository;
@@ -77,6 +77,7 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 	private final ProvisioningReadPlatformService provisioningReadPlatformService;
     private final ProvisioningCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 	private final ProcessRequestReadplatformService processRequestReadplatformService;
+	private final ProcessRequestWriteplatformService processRequestWriteplatformService;
 	private final IpPoolManagementReadPlatformService ipPoolManagementReadPlatformService;
 	
 	
@@ -84,11 +85,11 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 	public ProvisioningWritePlatformServiceImpl(final PlatformSecurityContext context,final InventoryItemDetailsRepository inventoryItemDetailsRepository,
 			final ProvisioningCommandFromApiJsonDeserializer fromApiJsonDeserializer,final FromJsonHelper fromApiJsonHelper,final OrderReadPlatformService orderReadPlatformService,
 			final ProvisioningCommandRepository provisioningCommandRepository,final ServiceParametersRepository parametersRepository,
-			final ProcessRequestRepository processRequestRepository,final OrderRepository orderRepository,final PrepareRequsetRepository prepareRequsetRepository,
-			final FromJsonHelper fromJsonHelper,final HardwareAssociationRepository associationRepository,final ServiceMasterRepository serviceMasterRepository,
+			final ProcessRequestRepository processRequestRepository,final OrderRepository orderRepository,final FromJsonHelper fromJsonHelper,
+			final HardwareAssociationRepository associationRepository,final ServiceMasterRepository serviceMasterRepository,final ClientRepository clientRepository,
 			final ProcessRequestReadplatformService processRequestReadplatformService,final IpPoolManagementJpaRepository ipPoolManagementJpaRepository,
-			final IpPoolManagementReadPlatformService ipPoolManagementReadPlatformService,final ClientRepository clientRepository,
-			final ProvisioningReadPlatformService provisioningReadPlatformService) {
+			final IpPoolManagementReadPlatformService ipPoolManagementReadPlatformService,final ProvisioningReadPlatformService provisioningReadPlatformService,
+			final ProcessRequestWriteplatformService processRequestWriteplatformService) {
 
     	this.context = context;
     	this.fromJsonHelper=fromJsonHelper;
@@ -100,13 +101,13 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 		this.serviceMasterRepository=serviceMasterRepository;
 		this.serviceParametersRepository=parametersRepository;
 		this.processRequestRepository=processRequestRepository;
-		this.prepareRequsetRepository=prepareRequsetRepository;
 		this.orderReadPlatformService=orderReadPlatformService;
 		this.provisioningCommandRepository=provisioningCommandRepository;
 		this.ipPoolManagementJpaRepository=ipPoolManagementJpaRepository;
 		this.inventoryItemDetailsRepository=inventoryItemDetailsRepository;
 		this.provisioningReadPlatformService=provisioningReadPlatformService;
 		this.processRequestReadplatformService=processRequestReadplatformService;
+		this.processRequestWriteplatformService=processRequestWriteplatformService;
 		this.ipPoolManagementReadPlatformService=ipPoolManagementReadPlatformService;
 
 	}
@@ -410,6 +411,36 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 			e.printStackTrace();
 		}
 		
+	}
+
+	@Transactional
+	@Override
+	public CommandProcessingResult confirmProvisioningDetails(Long entityId) {
+		
+		try{
+             this.context.authenticatedUser();
+             ProcessRequest processRequest=this.processRequestRepository.findOne(entityId);
+             
+             	if(processRequest == null){
+             		throw new ProvisioningRequestNotFoundException(entityId);
+             	}
+             	processRequest.setProcessStatus('C');
+             	processRequest.setNotify();
+             	List<ProcessRequestDetails> details=processRequest.getProcessRequestDetails();
+             		
+             		for(ProcessRequestDetails processRequestDetails:details){
+             			processRequestDetails.setRecievedMessage("Manually Confirmed");
+             		}
+             		
+             		this.processRequestRepository.save(processRequest);
+             	    this.processRequestWriteplatformService.notifyProcessingDetails(processRequest, 'Y');	
+             	
+			return new CommandProcessingResult(entityId);
+		
+		}catch(DataIntegrityViolationException dve){
+			handleCodeDataIntegrityIssues(null, dve);
+			return new CommandProcessingResult(Long.valueOf(-1));
+		}
 	}
 
 	

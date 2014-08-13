@@ -12,6 +12,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
@@ -106,35 +107,15 @@ public class EventOrderApiResource {
 	        return this.toApiJsonSerializer.serialize(settings, data, RESPONSE_DATA_PARAMETERS);
 		}
 		
-		/*@GET
+		@GET
 		@Consumes({MediaType.APPLICATION_JSON})
 		@Produces({MediaType.APPLICATION_JSON})
-		public String gteEventPrice(@QueryParam("clientId") final Long clientId,@QueryParam("ftype") final String fType, @QueryParam("otype")final String oType, @Context final UriInfo uriInfo){
-			context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-			EventOrderData data = null;
-			try{
-				
-				final BigDecimal eventPrice = eventOrderReadplatformServie.retriveEventPrice(fType, oType, clientId);
-				data = new EventOrderData(eventPrice);
-				
-			}catch(EmptyResultDataAccessException accessException){
-				throw new NoEventPriceFoundException();
-			}
+		public String gteEventPrice(@QueryParam("clientId") final Long clientId,@QueryParam("ftype") final String fType,
+				@QueryParam("otype")final String oType, @Context final UriInfo uriInfo){
 			
+			List<EventOrderData> eventOrderDatas=this.eventOrderReadplatformServie.getTheClientEventOrders(clientId);
 			final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-			return this.toApiJsonSerializer.serialize(settings, data, RESPONSE_DATA_PARAMETERS);
-		}*/
-		
-		/*@PUT
-		@Consumes({MediaType.APPLICATION_JSON})
-		@Produces({MediaType.APPLICATION_JSON})
-		public String updatePrice(final String apiRequestBodyAsJson){
-			
-			final CommandWrapper commandRequest = new CommandWrapperBuilder().updateEventOrderPrice().withJson(apiRequestBodyAsJson).build();
-		    final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-		    return this.toApiJsonSerializer.serialize(result);
-		    
-		    
-		}*/
+			return this.toApiJsonSerializer.serialize(settings, eventOrderDatas, RESPONSE_DATA_PARAMETERS);
+		}
 		
 }

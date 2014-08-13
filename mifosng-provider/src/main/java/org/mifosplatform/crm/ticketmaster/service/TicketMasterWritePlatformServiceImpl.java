@@ -192,7 +192,7 @@ catch (DataIntegrityViolationException dve) {
 		
 		
 		List<ActionDetaislData> actionDetaislDatas=this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_CREATE_TICKET);
-		if(actionDetaislDatas.size() != 0){
+		if(!actionDetaislDatas.isEmpty()){
 			this.actiondetailsWritePlatformService.AddNewActions(actionDetaislDatas,command.getClientId(), ticketMaster.getId().toString());
 		}
 		

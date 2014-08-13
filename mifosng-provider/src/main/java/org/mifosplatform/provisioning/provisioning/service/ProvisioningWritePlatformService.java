@@ -19,6 +19,8 @@ public interface ProvisioningWritePlatformService {
 	void updateHardwareDetails(Long clientId, String serialNumber,String oldSerialnumber, String provSerilaNum, String oldHardware);
 
 	void postOrderDetailsForProvisioning(Order order, String planName, String reqType, Long prepareId,String groupName, String serialNo, Long orderId);
+
+	CommandProcessingResult confirmProvisioningDetails(Long entityId);
 	
 
 

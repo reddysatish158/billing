@@ -272,7 +272,7 @@ public class CommandWrapper {
     }
     
     public boolean isActivationProcessResource() {
-        return this.entityName.equalsIgnoreCase("ACTIVATE") && this.entityName.equalsIgnoreCase("ACTIVATIONPROCESS");
+        return this.actionName.equalsIgnoreCase("ACTIVATE") && this.entityName.equalsIgnoreCase("ACTIVATIONPROCESS");
     }
 
     public boolean isClientActivation() {
@@ -1153,5 +1153,13 @@ public class CommandWrapper {
 		public boolean isSelfRegistrationResource() {
 			return this.actionName.equalsIgnoreCase("SELFREGISTRATION") && this.entityName.equalsIgnoreCase("ACTIVATE");
 
+		}
+
+		public boolean isOrderReactive() {
+			return this.actionName.equalsIgnoreCase("REACTIVE") && this.entityName.equalsIgnoreCase("ORDER");
+		}
+
+		public boolean isConfirm() {
+			return this.actionName.equalsIgnoreCase("CONFIRM") && this.entityName.equalsIgnoreCase("PROVISIONINGDETAILS");
 		}
 }
