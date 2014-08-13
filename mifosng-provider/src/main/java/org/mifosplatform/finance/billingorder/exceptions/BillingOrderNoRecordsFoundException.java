@@ -1,6 +1,7 @@
 package org.mifosplatform.finance.billingorder.exceptions;
 
 import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRuleException;
+import org.mifosplatform.portfolio.client.domain.Client;
 
 
 public class BillingOrderNoRecordsFoundException extends AbstractPlatformDomainRuleException {
@@ -21,6 +22,10 @@ public class BillingOrderNoRecordsFoundException extends AbstractPlatformDomainR
 	public BillingOrderNoRecordsFoundException(String msg,Long billId) {
 		 super("error.msg.no.generate.pdf.file.for.this.statement", "No Generate Pdf File For This Statement ", billId);
 		 
+	}
+
+	public BillingOrderNoRecordsFoundException(String msg, Client client) {
+		 super("error.msg.no.emailId.is.available", "EmailId is not available",msg);
 	}
 	
 }
