@@ -571,7 +571,8 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 				}
 				
 			Map<String, Object> parameters = new HashMap();
-			String id = String.valueOf(billMaster.getId());
+			//String id = String.valueOf(billMaster.getId());
+			Integer id=Integer.valueOf(billMaster.getId().toString());
 			parameters.put("param1", id);
 			//parameters.put("param1",new LocalDate(billMaster.getBillDate())+"/"+billNo);
 			parameters.put("SUBREPORT_DIR",jpath+""+File.separator);

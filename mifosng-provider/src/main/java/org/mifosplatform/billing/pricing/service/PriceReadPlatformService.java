@@ -12,12 +12,20 @@ import org.mifosplatform.portfolio.plan.data.ServiceData;
 public interface PriceReadPlatformService {
 
 	 List<ChargesData> retrieveChargeCode();
+	 
      List<EnumOptionData> retrieveChargeVariantData();
-	List<DiscountMasterData> retrieveDiscountDetails();
-//	List<PlanData> retrievePlanDetails();
-	List<SubscriptionData> retrievePaytermData();
-	List<ServiceData> retrievePriceDetails(String planCode);
-	List<ServiceData> retrievePrcingDetails(Long planId);
-	List<ServiceData> retrieveServiceCodeDetails(Long planCode);
-	PricingData retrieveSinglePriceDetails(String priceId);
+     
+     List<DiscountMasterData> retrieveDiscountDetails();
+
+     List<SubscriptionData> retrievePaytermData();
+     
+     List<ServiceData> retrievePriceDetails(String planCode);
+	
+     List<ServiceData> retrievePrcingDetails(Long planId);
+	
+     List<ServiceData> retrieveServiceCodeDetails(Long planCode);
+	
+     PricingData retrieveSinglePriceDetails(String priceId);
+	
+     List<PricingData> retrievePlanAndPriceDetails();
 }
