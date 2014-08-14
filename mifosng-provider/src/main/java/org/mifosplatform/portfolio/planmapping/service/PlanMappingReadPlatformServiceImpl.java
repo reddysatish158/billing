@@ -40,7 +40,7 @@ public class PlanMappingReadPlatformServiceImpl implements PlanMappingReadPlatfo
 		public String schema() {
 
 			return " ps.id as id, ps.plan_id as planId, p.plan_code as planCode, ps.plan_identification as planIdentification, " +
-					" ps.status as status from  b_plan_master p, b_prov_plan_details ps where p.plan_status = 1 and ps.plan_id=p.id ";
+					" ps.status as status,ps.image as image from  b_plan_master p, b_prov_plan_details ps where p.plan_status = 1 and ps.plan_id=p.id ";
 		}
 
 		@Override
@@ -52,8 +52,9 @@ public class PlanMappingReadPlatformServiceImpl implements PlanMappingReadPlatfo
 			String planIdentification = rs.getString("planIdentification");
 			String status = rs.getString("status");
 			Long planId = rs.getLong("planId");
+			String image = rs.getString("image");
 
-			return new PlanMappingData(id, planCode, planIdentification, status, planId);
+			return new PlanMappingData(id, planCode, planIdentification, status, planId,image);
 		}
 	}
 	

@@ -14,14 +14,16 @@ public class PlanMappingData {
 	private String planIdentification;
 	private List<EnumOptionData> status;
 	private List<PlanCodeData> planCodeData;
+	private String image;
 
-	public PlanMappingData(Long id, String planCode, String planIdentification,String planStatus, Long planId) {
+	public PlanMappingData(Long id, String planCode, String planIdentification,String planStatus, Long planId,String image) {
 
 		this.id = id;
 		this.planCode = planCode;
 		this.planIdentification = planIdentification;
 		this.planStatus = planStatus;
 		this.planId = planId;
+		this.image = image;
 	}
 
 	public PlanMappingData(List<PlanCodeData> planCodeData,List<EnumOptionData> status) {
