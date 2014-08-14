@@ -29,7 +29,7 @@ public class PlanMappingCommandFromApiJsonDeserializer {
     /**
      * The parameters supported for this command.
      */
-    private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id","planId","planIdentification","status"));
+    private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id","planId","planIdentification","status","image"));
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
