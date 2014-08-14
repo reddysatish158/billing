@@ -2100,6 +2100,15 @@ public CommandWrapperBuilder updateprovisiongDetails(Long processrequestId) {
     return this;
 }
 
+public CommandWrapperBuilder confirnProvisiongDetails(Long processrequestId) {
+
+	this.actionName = "CONFIRM";
+    this.entityName = "PROVISIONINGDETAILS";
+    this.entityId=processrequestId;
+    this.href = "/provisioning/confirm"+processrequestId;
+    return this;
+}
+
 public CommandWrapperBuilder createGlobalConfiguration() {
 	this.actionName = "CREATE";
 	this.entityName = "SMTPCONFIGURATION";
@@ -2429,6 +2438,14 @@ public CommandWrapperBuilder updateIpDetails(Long orderId) {
     this.entityName = "IPDETAILPARAMS";
     this.entityId=orderId;
     this.href = "/ipdetails/"+orderId;
+	return this;
+}
+
+public CommandWrapperBuilder reactiveOrder(Long orderId) {
+	this.actionName = "REACTIVE";
+	this.entityName = "ORDER";
+	this.entityId=orderId;
+	this.href = "reactive/"+orderId;
 	return this;
 }
 

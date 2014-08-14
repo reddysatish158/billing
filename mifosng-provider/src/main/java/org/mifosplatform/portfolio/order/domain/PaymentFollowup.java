@@ -37,6 +37,13 @@ public class PaymentFollowup extends AbstractAuditableCustom<AppUser, Long> {
 	@Column(name = "requested_status")
 	private String requestedStatus;
 	
+	@Column(name = "reactive_date")
+	private Date reactiveDate;
+	
+	public PaymentFollowup(){
+		
+	}
+	
 	public PaymentFollowup(Long clientId, Long orderId, LocalDate followupDate, String followupReason, String followupDesc,
 			String currentStatus, String requestedStatus) {
 		this.clientId=clientId;
@@ -82,6 +89,38 @@ public class PaymentFollowup extends AbstractAuditableCustom<AppUser, Long> {
 
 	public String getRequestedStatus() {
 		return requestedStatus;
+	}
+
+	public void setClientId(Long clientId) {
+		this.clientId = clientId;
+	}
+
+	public void setOrderId(Long orderId) {
+		this.orderId = orderId;
+	}
+
+	public void setFollowupDate(Date followupDate) {
+		this.followupDate = followupDate;
+	}
+
+	public void setFollowupReason(String followupReason) {
+		this.followupReason = followupReason;
+	}
+
+	public void setFollowupDesc(String followupDesc) {
+		this.followupDesc = followupDesc;
+	}
+
+	public void setCurrentStatus(String currentStatus) {
+		this.currentStatus = currentStatus;
+	}
+
+	public void setRequestedStatus(String requestedStatus) {
+		this.requestedStatus = requestedStatus;
+	}
+
+	public void setReactiveDate(Date reactiveDate) {
+		this.reactiveDate = reactiveDate;
 	}
  
 	

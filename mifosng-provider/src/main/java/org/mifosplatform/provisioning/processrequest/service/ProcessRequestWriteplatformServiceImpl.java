@@ -176,8 +176,10 @@ public class ProcessRequestWriteplatformServiceImpl implements ProcessRequestWri
 							}else if(detailsData.getRequestType().equalsIgnoreCase(UserActionStatusTypeEnum.SUSPENTATION.toString())){
 								EnumDomainService enumDomainService=this.enumDomainServiceRepository.findOneByEnumMessageProperty(StatusTypeEnum.SUSPENDED.toString());
 								order.setStatus(enumDomainService.getEnumId());
-							}
-							else{
+							}else if(detailsData.getRequestType().equalsIgnoreCase(UserActionStatusTypeEnum.REACTIVATION.toString())){
+								EnumDomainService enumDomainService=this.enumDomainServiceRepository.findOneByEnumMessageProperty(StatusTypeEnum.ACTIVE.toString());
+								order.setStatus(enumDomainService.getEnumId());
+							}else{
 								order.setStatus(OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.ACTIVE).getId());
 								client.setStatus(ClientStatus.ACTIVE.getValue());
 								this.clientRepository.saveAndFlush(client);

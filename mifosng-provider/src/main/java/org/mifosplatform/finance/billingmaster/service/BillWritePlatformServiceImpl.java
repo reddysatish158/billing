@@ -571,6 +571,7 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 				}
 				
 			Map<String, Object> parameters = new HashMap();
+
 			//String id1 = String.valueOf(billMaster.getId());
 			Integer id=Integer.valueOf(billMaster.getId().toString());
 			parameters.put("param1", id);

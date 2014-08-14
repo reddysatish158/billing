@@ -46,7 +46,7 @@ public class PlanMappingWritePlatformServiceImpl implements PlanMappingWritePlat
 			handleCodeDataIntegrityIssues(command, dve);
 			return CommandProcessingResult.empty();
 		}
-
+		
 	}
 	
 	@Override

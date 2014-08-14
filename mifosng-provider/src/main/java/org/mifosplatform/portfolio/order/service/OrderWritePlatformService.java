@@ -32,4 +32,6 @@ public interface OrderWritePlatformService {
 	CommandProcessingResult orderTermination(JsonCommand command, Long entityId);
 
 	CommandProcessingResult orderSuspention(JsonCommand command, Long entityId);
+
+	CommandProcessingResult reactiveOrder(JsonCommand command, Long entityId);
 }

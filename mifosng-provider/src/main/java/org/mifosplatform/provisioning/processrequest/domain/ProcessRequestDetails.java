@@ -219,6 +219,11 @@ public class ProcessRequestDetails extends
 	public String getServiceType() {
 		return serviceType;
 	}
+
+	public void setRecievedMessage(String message) {
+		this.receiveMessage=message;
+		
+	}
 	
 	
 

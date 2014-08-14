@@ -555,6 +555,8 @@ public class SynchronousCommandProcessingService implements
 				handler = applicationContext.getBean("orderTerminationCommandHandler",NewCommandSourceHandler.class);
 			}else if (wrapper.isOrderSuspend()) {
 				handler = applicationContext.getBean("orderSuspendCommandHandler",NewCommandSourceHandler.class);
+			}else if (wrapper.isOrderReactive()) {
+				handler = applicationContext.getBean("orderReactiveCommandHandler",NewCommandSourceHandler.class);
 			}
 		} else if (wrapper.isOrderScheduling()) {
 			if (wrapper.isCreate()) {
@@ -610,29 +612,28 @@ public class SynchronousCommandProcessingService implements
 				}
 			
 		} 
-			
-			else if (wrapper.isAdjustmentResource()) {
+		else if (wrapper.isAdjustmentResource()) {
 
-	        	if (wrapper.isCreate()) {
-	                handler = applicationContext.getBean("createAdjustmentCommandHandler", NewCommandSourceHandler.class);
-	            } else if (wrapper.isUpdate()) {
-	                handler = applicationContext.getBean("updateAdjustmentCommandHandler", NewCommandSourceHandler.class);
-	            } else if (wrapper.isDelete()) {
-	                handler = applicationContext.getBean("deleteAdjustmentCommandHandler", NewCommandSourceHandler.class);
-	            } else {
-	                throw new UnsupportedCommandException(wrapper.commandName());
-	            }
+	       if (wrapper.isCreate()) {
+	    	   handler = applicationContext.getBean("createAdjustmentCommandHandler", NewCommandSourceHandler.class);
+	       } else if (wrapper.isUpdate()) {
+	    	   handler = applicationContext.getBean("updateAdjustmentCommandHandler", NewCommandSourceHandler.class);
+	       } else if (wrapper.isDelete()) {
+	    	   handler = applicationContext.getBean("deleteAdjustmentCommandHandler", NewCommandSourceHandler.class);
+	       } else {
+	    	   throw new UnsupportedCommandException(wrapper.commandName());
+	       }
 
-	        }else if (wrapper.isPaymentResource()) {
-	        	if (wrapper.isCreate()) {
-	                handler = applicationContext.getBean("createPaymentCommandHandler", NewCommandSourceHandler.class);
-	        	}else if (wrapper.isCancel()) {
-	                handler = applicationContext.getBean("cancelPaymentCommandHandler", NewCommandSourceHandler.class);
-	        	}else if (wrapper.isPaypalEnquirey()) {
-	                handler = applicationContext.getBean("paypalEnquireyPaymentCommandHandler", NewCommandSourceHandler.class);
-	        	}else {
-	                    throw new UnsupportedCommandException(wrapper.commandName());
-	                }
+		}else if (wrapper.isPaymentResource()) {
+			if (wrapper.isCreate()) {
+				handler = applicationContext.getBean("createPaymentCommandHandler", NewCommandSourceHandler.class);
+	        }else if (wrapper.isCancel()) {
+	        	handler = applicationContext.getBean("cancelPaymentCommandHandler", NewCommandSourceHandler.class);
+	        }else if (wrapper.isPaypalEnquirey()) {
+	        	handler = applicationContext.getBean("paypalEnquireyPaymentCommandHandler", NewCommandSourceHandler.class);
+	        }else {
+	        	throw new UnsupportedCommandException(wrapper.commandName());
+	        }
 			} else if (wrapper.isPaymodeResource()) {
 				if (wrapper.isCreate()) {
 	                handler = applicationContext.getBean("createPaymodeCommandHandler", NewCommandSourceHandler.class);
@@ -898,11 +899,11 @@ public class SynchronousCommandProcessingService implements
 			                throw new UnsupportedCommandException(wrapper.commandName());
 			            }
 			} else if (wrapper.isCacheResource()) {
-	            if (wrapper.isUpdateOperation()) {
-	                handler = this.applicationContext.getBean("updateCacheCommandHandler", NewCommandSourceHandler.class);
-	            } else {
-	                throw new UnsupportedCommandException(wrapper.commandName());
-	            }
+	            	if (wrapper.isUpdateOperation()) {
+	            		handler = this.applicationContext.getBean("updateCacheCommandHandler", NewCommandSourceHandler.class);
+	            	} else {
+	            		throw new UnsupportedCommandException(wrapper.commandName());
+	            	}
 	        } else if(wrapper.isEntitlementResource()){
 		                 if(wrapper.isCreateEntitlement()) {
 		                     handler = applicationContext.getBean("createEntitlementCommandHandler",NewCommandSourceHandler.class);
@@ -951,10 +952,12 @@ public class SynchronousCommandProcessingService implements
 				     }
 			   }else if(wrapper.isProvisioningDetails()){
 				   if(wrapper.isUpdate()) {
-					   handler = applicationContext.getBean("updateProvisioningDetailsCommandHandler",NewCommandSourceHandler.class);
-					   }else {
+					   	handler = applicationContext.getBean("updateProvisioningDetailsCommandHandler",NewCommandSourceHandler.class);
+				   }else if(wrapper.isConfirm()) {
+					   	handler = applicationContext.getBean("confirmProvisioningDetailsCommandHandler",NewCommandSourceHandler.class);
+				   }else {
 					   throw new UnsupportedCommandException(wrapper.commandName());
-					   }
+				   }
 			   }else if(wrapper.isUserChatResource()){
 				   if(wrapper.isCreate()) {
 				         handler = applicationContext.getBean("createUserChatCommandHandler",NewCommandSourceHandler.class);

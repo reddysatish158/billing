@@ -100,6 +100,18 @@ public class PricingApiResource {
 	final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
     return this.toApiJsonSerializer.serialize(settings, data, RESPONSE_DATA_PARAMETERS);
 	}
+	
+	@GET
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String retrievePlanAndPriceDetails(@Context final UriInfo uriInfo) {
+		
+	 context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
+	List<PricingData> pricingDatas = this.priceReadPlatformService.retrievePlanAndPriceDetails();
+	final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+    return this.toApiJsonSerializer.serialize(settings, pricingDatas, RESPONSE_DATA_PARAMETERS);
+	}
+	
 	@GET
 	@Path("{priceId}/update")
 	@Consumes({ MediaType.APPLICATION_JSON })

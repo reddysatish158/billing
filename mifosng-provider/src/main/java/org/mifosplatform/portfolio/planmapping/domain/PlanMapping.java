@@ -26,15 +26,19 @@ public class PlanMapping extends AbstractPersistable<Long> {
 
 	@Column(name = "is_deleted")
 	private String isDeleted = "n";
+	
+	@Column(name="image")
+	private String image;
 
 	public PlanMapping() {
 
 	}
 
-	public PlanMapping(Long planId, String planIdentification, String status) {
+	public PlanMapping(Long planId, String planIdentification, String status,String image) {
 		this.planId = planId;
 		this.planIdentification = planIdentification;
 		this.status = status;
+		this.image = image;
 	}
 
 	public static PlanMapping fromJson(JsonCommand command) {
@@ -42,8 +46,9 @@ public class PlanMapping extends AbstractPersistable<Long> {
 		final Long planId = command.longValueOfParameterNamed("planId");
 		final String planIdentification = command.stringValueOfParameterNamed("planIdentification");
 		final String status = command.stringValueOfParameterNamed("status");
-
-		return new PlanMapping(planId, planIdentification, status);
+		final String image = command.stringValueOfParameterNamed("image");
+		
+		return new PlanMapping(planId, planIdentification, status,image);
 	}
 
 	public Long getPlanId() {
@@ -84,6 +89,13 @@ public class PlanMapping extends AbstractPersistable<Long> {
 			final String newValue = command.stringValueOfParameterNamed(statusParamName);
 			actualChanges.put(statusParamName, newValue);
 			this.status = StringUtils.defaultIfEmpty(newValue, null);
+		}
+		
+		final String image = "image";
+		if (command.isChangeInStringParameterNamed(image, this.image)) {
+			final String newValue = command.stringValueOfParameterNamed(image);
+			actualChanges.put(image, newValue);
+			this.image = StringUtils.defaultIfEmpty(newValue,null);
 		}
 
 		return actualChanges;
