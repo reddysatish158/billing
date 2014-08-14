@@ -1155,11 +1155,16 @@ public class CommandWrapper {
 
 		}
 
+		public boolean isIpDetails() {
+		     return  this.entityName.equalsIgnoreCase("IPDETAILPARAMS");
+		}
+		
 		public boolean isOrderReactive() {
 			return this.actionName.equalsIgnoreCase("REACTIVE") && this.entityName.equalsIgnoreCase("ORDER");
 		}
 
 		public boolean isConfirm() {
 			return this.actionName.equalsIgnoreCase("CONFIRM") && this.entityName.equalsIgnoreCase("PROVISIONINGDETAILS");
+
 		}
 }

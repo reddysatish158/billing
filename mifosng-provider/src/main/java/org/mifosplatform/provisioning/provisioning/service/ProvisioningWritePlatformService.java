@@ -20,7 +20,10 @@ public interface ProvisioningWritePlatformService {
 
 	void postOrderDetailsForProvisioning(Order order, String planName, String reqType, Long prepareId,String groupName, String serialNo, Long orderId);
 
+	CommandProcessingResult updateIpDetails(Long entityId, JsonCommand command);
+
 	CommandProcessingResult confirmProvisioningDetails(Long entityId);
+
 	
 
 

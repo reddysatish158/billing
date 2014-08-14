@@ -1095,10 +1095,18 @@ public class SynchronousCommandProcessingService implements
 				           throw new UnsupportedCommandException(wrapper.commandName());
 				     }
 			    }else if(wrapper.isSelfRegistrationResource()){
+			    	 if(wrapper.isSelfRegistrationResource()){
 			        		handler = applicationContext.getBean("createSelfRegistrationCommandHandler",NewCommandSourceHandler.class);
-			    }else {
+			         }else {
 			               throw new UnsupportedCommandException(wrapper.commandName());
-		       }
+		            }
+		        }else if(wrapper.isIpDetails()){
+		    	   if(wrapper.isUpdateOperation()) {
+				         handler = applicationContext.getBean("updateIpDetailsCommandHandler",NewCommandSourceHandler.class);
+				     }else {
+	               throw new UnsupportedCommandException(wrapper.commandName());
+                }
+		  }
 			   	
 	       return handler;
 	      
