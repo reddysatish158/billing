@@ -127,6 +127,23 @@ final JsonArray serviceParametersArray=fromApiJsonHelper.extractJsonArrayNamed("
 throwExceptionIfValidationWarningsExist(dataValidationErrors);
 }
 
+/*public void validateForUpDateIpDetails(String json) {
+	
+	if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+
+    final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, provisioningsupportedParameters);
+
+    final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+    final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("ipDetails");
+    
+    final JsonElement element = fromApiJsonHelper.parse(json);
+    final JsonArray deletedIpsArray=fromApiJsonHelper.extractJsonArrayNamed("DeletedIPs",element);
+    final JsonArray newIpsArray=fromApiJsonHelper.extractJsonArrayNamed("NewIPsData",element);
+    
+
+}*/
+
 
 		
 	

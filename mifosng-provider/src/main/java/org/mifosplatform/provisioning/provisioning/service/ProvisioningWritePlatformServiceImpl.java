@@ -411,6 +411,50 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 		}
 		
 	}
-
 	
-}
+	@Transactional
+	@Override
+	public CommandProcessingResult updateIpDetails(Long orderId,JsonCommand command) {
+		
+		try{
+			this.context.authenticatedUser();
+			//this.fromApiJsonDeserializer.validateForUpDateIpDetails(command.json());
+			final Long clientId=command.longValueOfParameterNamed("clientId");
+			final JsonElement element = fromJsonHelper.parse(command.json());
+			final JsonArray exitIpsArray=fromApiJsonHelper.extractJsonArrayNamed("existIps",element);
+			final JsonArray newIpsArray=fromApiJsonHelper.extractJsonArrayNamed("newIps",element);
+			IpPoolManagementDetail ipPoolManagement=null;
+			List<ServiceParameters> parameters=this.serviceParametersRepository.findDataByOrderId(orderId);
+			for(ServiceParameters serviceData:parameters){
+				if(serviceData.getParameterName().equalsIgnoreCase(ProvisioningApiConstants.PROV_DATA_IPADDRESS)){
+					serviceData.setParameterValue(newIpsArray.toString());
+					 if(exitIpsArray.size()>=1){
+					      for (int i=0;i<exitIpsArray.size(); i++){
+					    	  ipPoolManagement= this.ipPoolManagementJpaRepository.findIpAddressData(exitIpsArray.get(i).toString());
+					    	  ipPoolManagement.setStatus('F');
+					    	  ipPoolManagement.setClientId(null);
+					    	  ipPoolManagement.setSubnet(null);
+					      }
+					      this.ipPoolManagementJpaRepository.save(ipPoolManagement);
+					   }
+					if(newIpsArray.size()>=1){
+					      for (int i=0;i<newIpsArray.size(); i++){
+					    	  ipPoolManagement= this.ipPoolManagementJpaRepository.findIpAddressData(newIpsArray.get(i).toString());
+					    	  ipPoolManagement.setStatus('A');
+					    	  ipPoolManagement.setClientId(clientId);
+					    	 // ipPoolManagement.setSubnet(null);
+					      }
+					      this.ipPoolManagementJpaRepository.save(ipPoolManagement);
+					   }	
+					 
+					
+				}
+		}
+	
+		}catch(DataIntegrityViolationException dve){
+			handleCodeDataIntegrityIssues(null, dve);
+		}
+		return new CommandProcessingResult(orderId);	
+		
+	}
+}	

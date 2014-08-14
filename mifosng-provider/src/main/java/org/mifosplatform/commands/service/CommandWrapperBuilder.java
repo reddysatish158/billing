@@ -2424,6 +2424,13 @@ public CommandWrapperBuilder selfRegistrationProcess() {
 	return this;
 }
 
+public CommandWrapperBuilder updateIpDetails(Long orderId) {
+	this.actionName = "UPDATE";
+    this.entityName = "IPDETAILPARAMS";
+    this.entityId=orderId;
+    this.href = "/ipdetails/"+orderId;
+	return this;
+}
 
 }
 

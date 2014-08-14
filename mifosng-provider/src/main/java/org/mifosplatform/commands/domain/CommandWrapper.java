@@ -1154,4 +1154,8 @@ public class CommandWrapper {
 			return this.actionName.equalsIgnoreCase("SELFREGISTRATION") && this.entityName.equalsIgnoreCase("ACTIVATE");
 
 		}
+
+		public boolean isIpDetails() {
+		     return  this.entityName.equalsIgnoreCase("IPDETAILPARAMS");
+		}
 }
