@@ -294,8 +294,9 @@ public class UploadStatusWritePlatformServiceImp implements UploadStatusWritePla
 				if(currentLineData.length>=2){
 					
 					jsonObject.put("mrnId",currentLineData[0]);
-					jsonObject.put("serialNumber",currentLineData[1]);
-					jsonObject.put("type",currentLineData[2]);
+					jsonObject.put("itemId", currentLineData[1]);
+					jsonObject.put("serialNumber",currentLineData[2]);
+					jsonObject.put("type",currentLineData[3]);
 					jsonObject.put("locale","en");
 					totalRecordCount++;
 					context.authenticatedUser().validateHasReadPermission(MRN_RESOURCE_TYPE);
